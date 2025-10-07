@@ -16,70 +16,68 @@ func NewMovieDataBase() MovieDataBase {
 	}
 }
 
-func (m MovieDataBase) String() string {
+func (mdb MovieDataBase) String() string {
 	var sb strings.Builder
 
-	for _, movie := range m.db {
-		sb.WriteString(fmt.Sprintf("%s\n", movie))
+	for _, m := range mdb.db {
+		sb.WriteString(fmt.Sprintf("%s\n", m))
 	}
 
 	return sb.String()
 }
 
-func (m MovieDataBase) GetAllMovies() []Movie {
-	result := make([]Movie, len(m.db))
+func (mdb MovieDataBase) GetAll() []Movie {
+	result := make([]Movie, len(mdb.db))
 
 	idx := 0
-	for _, movie := range m.db {
-		result[idx] = movie
+	for _, m := range mdb.db {
+		result[idx] = m
 		idx++
 	}
 
 	return result
 }
 
-func (m MovieDataBase) GetMovieById(id uint64) (Movie, error) {
-	movie, exists := m.db[id]
+func (mdb MovieDataBase) GetById(id uint64) (Movie, error) {
+	m, exists := mdb.db[id]
 
 	if !exists {
-		return movie, utils.NewEntityDoesNotExistError("Movie", id)
+		return m, utils.NewEntityDoesNotExistError("Movie", id)
 	}
 
-	return movie, nil
+	return m, nil
 }
 
-func (m MovieDataBase) AddMovie(movie Movie) uint64 {
+func (mdb MovieDataBase) Add(m Movie) uint64 {
 	id := utils.GenerateId()
-	movie.Id = id
-	m.db[id] = movie
+	m.Id = id
+	mdb.db[id] = m
 	return id
 }
 
-func (m MovieDataBase) UpdateMovie(id uint64, movie Movie) (bool, error) {
-	_, err := m.GetMovieById(id)
+func (mdb MovieDataBase) Update(id uint64, u Movie) (bool, error) {
+	m, err := mdb.GetById(id)
 
 	if err != nil {
 		return false, err
 	}
 
-	updatedMovie := m.db[id]
+	m.Name = u.Name
+	m.Year = u.Year
 
-	updatedMovie.Name = movie.Name
-	updatedMovie.Year = movie.Year
-
-	m.db[id] = updatedMovie
+	mdb.db[id] = m
 
 	return true, nil
 }
 
-func (m MovieDataBase) DeleteMovie(id uint64) (bool, error) {
-	_, err := m.GetMovieById(id)
+func (mdb MovieDataBase) Delete(id uint64) (bool, error) {
+	_, err := mdb.GetById(id)
 
 	if err != nil {
 		return false, err
 	}
 
-	delete(m.db, id)
+	delete(mdb.db, id)
 
 	return true, nil
 }

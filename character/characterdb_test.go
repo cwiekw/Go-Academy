@@ -39,7 +39,7 @@ func TestNewCharacterDataBase(t *testing.T) {
 func TestCharacterDataBase_GetAllCharacters(t *testing.T) {
 	characterDb := initDB()
 
-	characters := characterDb.GetAllCharacters()
+	characters := characterDb.GetAll()
 
 	assert.Len(t, characters, 1, "Should return list of Characters")
 }
@@ -47,7 +47,7 @@ func TestCharacterDataBase_GetAllCharacters(t *testing.T) {
 func TestCharacterDataBase_GetMovieById_IdNotFound(t *testing.T) {
 	characterDb := initDB()
 
-	_, err := characterDb.GetCharacterById(1000)
+	_, err := characterDb.GetById(1000)
 
 	assert.EqualError(t, err, "Character entity for id 1000 does not exist!", "Should return error for not found ID")
 }
@@ -55,7 +55,7 @@ func TestCharacterDataBase_GetMovieById_IdNotFound(t *testing.T) {
 func TestCharacterDataBase_GetMovieById(t *testing.T) {
 	characterDb := initDB()
 
-	character, err := characterDb.GetCharacterById(1)
+	character, err := characterDb.GetById(1)
 
 	expected := Character{
 		Id:      1,
@@ -70,7 +70,7 @@ func TestCharacterDataBase_GetMovieById(t *testing.T) {
 func TestCharacterDataBase_AddCharacter(t *testing.T) {
 	characterDb := initDB()
 
-	newCharacterId := characterDb.AddCharacter(createOtherCharacter())
+	newCharacterId := characterDb.Add(createOtherCharacter())
 	assert.Greater(t, newCharacterId, uint64(0), "Should add new character to db and return its ID")
 	assert.Len(t, characterDb.db, 2, "Should be 2 characters in DB")
 }
@@ -78,7 +78,7 @@ func TestCharacterDataBase_AddCharacter(t *testing.T) {
 func TestCharacterDataBase_UpdateCharacter_IdNotFound(t *testing.T) {
 	characterDb := initDB()
 
-	_, err := characterDb.UpdateCharacter(1000, createOtherCharacter())
+	_, err := characterDb.Update(1000, createOtherCharacter())
 
 	assert.EqualError(t, err, "Character entity for id 1000 does not exist!", "Should return error for not found ID")
 }
@@ -86,7 +86,7 @@ func TestCharacterDataBase_UpdateCharacter_IdNotFound(t *testing.T) {
 func TestCharacterDataBase_UpdateCharacter(t *testing.T) {
 	characterDb := initDB()
 
-	characterUpdated, err := characterDb.UpdateCharacter(1, createOtherCharacter())
+	characterUpdated, err := characterDb.Update(1, createOtherCharacter())
 
 	assert.Nil(t, err, "No error")
 	assert.Equal(t, true, characterUpdated, "Should update Character for ID 1 and return true")
@@ -98,7 +98,7 @@ func TestCharacterDataBase_UpdateCharacter(t *testing.T) {
 func TestCharacterDataBase_DeleteCharacter_IdNotFound(t *testing.T) {
 	characterDb := initDB()
 
-	_, err := characterDb.DeleteCharacter(1000)
+	_, err := characterDb.Delete(1000)
 
 	assert.EqualError(t, err, "Character entity for id 1000 does not exist!", "Should return error for not found ID")
 }
@@ -106,7 +106,7 @@ func TestCharacterDataBase_DeleteCharacter_IdNotFound(t *testing.T) {
 func TestCharacterDataBase_DeleteCharacter(t *testing.T) {
 	characterDb := initDB()
 
-	characterDeleted, err := characterDb.DeleteCharacter(1)
+	characterDeleted, err := characterDb.Delete(1)
 
 	assert.Nil(t, err, "No error")
 	assert.Equal(t, true, characterDeleted, "Should deleted Character for ID 1 and return true")

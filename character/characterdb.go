@@ -16,70 +16,68 @@ func NewCharacterDataBase() CharacterDataBase {
 	}
 }
 
-func (c CharacterDataBase) String() string {
+func (cdb CharacterDataBase) String() string {
 	var sb strings.Builder
 
-	for id, character := range c.db {
-		sb.WriteString(fmt.Sprintf("%d: %s\n", id, character))
+	for id, c := range cdb.db {
+		sb.WriteString(fmt.Sprintf("%d: %s\n", id, c))
 	}
 
 	return sb.String()
 }
 
-func (c CharacterDataBase) GetAllCharacters() []Character {
-	result := make([]Character, len(c.db))
+func (cdb CharacterDataBase) GetAll() []Character {
+	result := make([]Character, len(cdb.db))
 
 	idx := 0
-	for _, character := range c.db {
-		result[idx] = character
+	for _, c := range cdb.db {
+		result[idx] = c
 		idx++
 	}
 
 	return result
 }
 
-func (c CharacterDataBase) GetCharacterById(id uint64) (Character, error) {
-	character, exists := c.db[id]
+func (cdb CharacterDataBase) GetById(id uint64) (Character, error) {
+	c, exists := cdb.db[id]
 
 	if !exists {
-		return character, utils.NewEntityDoesNotExistError("Character", id)
+		return c, utils.NewEntityDoesNotExistError("Character", id)
 	}
 
-	return character, nil
+	return c, nil
 }
 
-func (c CharacterDataBase) AddCharacter(character Character) uint64 {
+func (cdb CharacterDataBase) Add(c Character) uint64 {
 	id := utils.GenerateId()
-	character.Id = id
-	c.db[id] = character
+	c.Id = id
+	cdb.db[id] = c
 	return id
 }
 
-func (c CharacterDataBase) UpdateCharacter(id uint64, character Character) (bool, error) {
-	_, err := c.GetCharacterById(id)
+func (cdb CharacterDataBase) Update(id uint64, u Character) (bool, error) {
+	c, err := cdb.GetById(id)
 
 	if err != nil {
 		return false, err
 	}
 
-	updatedCharacter := c.db[id]
+	c.Name = u.Name
+	c.MovieId = u.MovieId
 
-	updatedCharacter.Name = character.Name
-	updatedCharacter.MovieId = character.MovieId
-
-	c.db[id] = updatedCharacter
+	cdb.db[id] = c
 
 	return true, nil
 }
 
-func (c CharacterDataBase) DeleteCharacter(id uint64) (bool, error) {
-	_, err := c.GetCharacterById(id)
+func (cdb CharacterDataBase) Delete(id uint64) (bool, error) {
+	_, err := cdb.GetById(id)
 
 	if err != nil {
 		return false, err
 	}
 
-	delete(c.db, id)
+	delete(cdb.db, id)
 
 	return true, nil
 }

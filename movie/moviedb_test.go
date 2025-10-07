@@ -45,7 +45,7 @@ func TestMovieDataBaseCreateWithoutNew(t *testing.T) {
 func TestMovieDataBase_GetAllMovies(t *testing.T) {
 	movieDb := initDB()
 
-	movies := movieDb.GetAllMovies()
+	movies := movieDb.GetAll()
 
 	assert.Len(t, movies, 1, "Should return list of Movies")
 }
@@ -53,7 +53,7 @@ func TestMovieDataBase_GetAllMovies(t *testing.T) {
 func TestMovieDataBase_GetMovieById_IdNotFound(t *testing.T) {
 	movieDb := initDB()
 
-	_, err := movieDb.GetMovieById(1000)
+	_, err := movieDb.GetById(1000)
 
 	assert.EqualError(t, err, "Movie entity for id 1000 does not exist!", "Should return error for not found ID")
 }
@@ -61,7 +61,7 @@ func TestMovieDataBase_GetMovieById_IdNotFound(t *testing.T) {
 func TestMovieDataBase_GetMovieById(t *testing.T) {
 	movieDb := initDB()
 
-	movie, err := movieDb.GetMovieById(1)
+	movie, err := movieDb.GetById(1)
 
 	expected := Movie{
 		Id:   1,
@@ -76,7 +76,7 @@ func TestMovieDataBase_GetMovieById(t *testing.T) {
 func TestMovieDataBase_AddMovie(t *testing.T) {
 	movieDb := initDB()
 
-	newMovieId := movieDb.AddMovie(createOtherMovie())
+	newMovieId := movieDb.Add(createOtherMovie())
 
 	assert.Greater(t, newMovieId, uint64(0), "Should add new movie to db and return its ID")
 	assert.Len(t, movieDb.db, 2, "Should be 2 movies in DB")
@@ -85,7 +85,7 @@ func TestMovieDataBase_AddMovie(t *testing.T) {
 func TestMovieDataBase_UpdateMovie_IdNotFound(t *testing.T) {
 	movieDb := initDB()
 
-	_, err := movieDb.UpdateMovie(1000, createOtherMovie())
+	_, err := movieDb.Update(1000, createOtherMovie())
 
 	assert.EqualError(t, err, "Movie entity for id 1000 does not exist!", "Should return error for not found ID")
 }
@@ -93,7 +93,7 @@ func TestMovieDataBase_UpdateMovie_IdNotFound(t *testing.T) {
 func TestMovieDataBase_UpdateMovie(t *testing.T) {
 	movieDb := initDB()
 
-	movieUpdated, err := movieDb.UpdateMovie(1, createOtherMovie())
+	movieUpdated, err := movieDb.Update(1, createOtherMovie())
 
 	assert.Nil(t, err, "No error")
 	assert.Equal(t, true, movieUpdated, "Should update Movie for ID 1 and return true")
@@ -105,7 +105,7 @@ func TestMovieDataBase_UpdateMovie(t *testing.T) {
 func TestMovieDataBase_DeleteMovie_IdNotFound(t *testing.T) {
 	movieDb := initDB()
 
-	_, err := movieDb.DeleteMovie(1000)
+	_, err := movieDb.Delete(1000)
 
 	assert.EqualError(t, err, "Movie entity for id 1000 does not exist!", "Should return error for not found ID")
 }
@@ -113,7 +113,7 @@ func TestMovieDataBase_DeleteMovie_IdNotFound(t *testing.T) {
 func TestMovieDataBase_DeleteMovie(t *testing.T) {
 	movieDb := initDB()
 
-	movieDeleted, err := movieDb.DeleteMovie(1)
+	movieDeleted, err := movieDb.Delete(1)
 
 	assert.Nil(t, err, "No error")
 	assert.Equal(t, true, movieDeleted, "Should delete Movie for ID 1 and return true")
