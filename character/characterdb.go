@@ -26,11 +26,7 @@ func (c CharacterDataBase) String() string {
 	return sb.String()
 }
 
-func (c CharacterDataBase) GetAllCharacters() ([]Character, error) {
-	if c.db == nil {
-		return nil, utils.NewDBNotInitializedError("Character")
-	}
-
+func (c CharacterDataBase) GetAllCharacters() []Character {
 	result := make([]Character, len(c.db))
 
 	idx := 0
@@ -39,14 +35,10 @@ func (c CharacterDataBase) GetAllCharacters() ([]Character, error) {
 		idx++
 	}
 
-	return result, nil
+	return result
 }
 
 func (c CharacterDataBase) GetCharacterById(id uint64) (Character, error) {
-	if c.db == nil {
-		return Character{}, utils.NewDBNotInitializedError("Character")
-	}
-
 	character, exists := c.db[id]
 
 	if !exists {
@@ -56,22 +48,14 @@ func (c CharacterDataBase) GetCharacterById(id uint64) (Character, error) {
 	return character, nil
 }
 
-func (c CharacterDataBase) AddCharacter(character Character) (uint64, error) {
-	if c.db == nil {
-		return 0, utils.NewDBNotInitializedError("Character")
-	}
-
+func (c CharacterDataBase) AddCharacter(character Character) uint64 {
 	id := utils.GenerateId()
 	character.Id = id
 	c.db[id] = character
-	return id, nil
+	return id
 }
 
 func (c CharacterDataBase) UpdateCharacter(id uint64, character Character) (bool, error) {
-	if c.db == nil {
-		return false, utils.NewDBNotInitializedError("Character")
-	}
-
 	_, err := c.GetCharacterById(id)
 
 	if err != nil {
@@ -89,10 +73,6 @@ func (c CharacterDataBase) UpdateCharacter(id uint64, character Character) (bool
 }
 
 func (c CharacterDataBase) DeleteCharacter(id uint64) (bool, error) {
-	if c.db == nil {
-		return false, utils.NewDBNotInitializedError("Character")
-	}
-
 	_, err := c.GetCharacterById(id)
 
 	if err != nil {

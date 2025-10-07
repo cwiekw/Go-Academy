@@ -9,7 +9,7 @@ import (
 const OTHER_CHARACTER = "Other character"
 const OTHER_MOVIE_ID = uint64(98765)
 
-func characterDbInitialized() CharacterDataBase {
+func initDB() CharacterDataBase {
 	return CharacterDataBase{
 		db: map[uint64]Character{
 			1: {
@@ -19,10 +19,6 @@ func characterDbInitialized() CharacterDataBase {
 			},
 		},
 	}
-}
-
-func characterDbNotInitialized() CharacterDataBase {
-	return CharacterDataBase{}
 }
 
 func createOtherCharacter() Character {
@@ -40,39 +36,16 @@ func TestNewCharacterDataBase(t *testing.T) {
 	assert.Equal(t, expected, result.db, "NewCharacterDataBase should initialized DB with empty map")
 }
 
-func TestCharacterDataBaseCreateWithoutNew(t *testing.T) {
-	result := CharacterDataBase{}
-
-	assert.Nil(t, result.db, "DB should be nil when creating directly")
-}
-
-func TestCharacterDataBase_GetAllCharacters_DBNotInitialized(t *testing.T) {
-	characterDb := characterDbNotInitialized()
-
-	_, err := characterDb.GetAllCharacters()
-
-	assert.EqualError(t, err, "Character database not initialized!", "Should return error for not initialized DB")
-}
-
 func TestCharacterDataBase_GetAllCharacters(t *testing.T) {
-	characterDb := characterDbInitialized()
+	characterDb := initDB()
 
-	characters, err := characterDb.GetAllCharacters()
+	characters := characterDb.GetAllCharacters()
 
-	assert.Nil(t, err, "No error")
 	assert.Len(t, characters, 1, "Should return list of Characters")
 }
 
-func TestCharacterDataBase_GetMovieById_DBNotInitialized(t *testing.T) {
-	characterDb := characterDbNotInitialized()
-
-	_, err := characterDb.GetCharacterById(1)
-
-	assert.EqualError(t, err, "Character database not initialized!", "Should return error for not initialized DB")
-}
-
 func TestCharacterDataBase_GetMovieById_IdNotFound(t *testing.T) {
-	characterDb := characterDbInitialized()
+	characterDb := initDB()
 
 	_, err := characterDb.GetCharacterById(1000)
 
@@ -80,7 +53,7 @@ func TestCharacterDataBase_GetMovieById_IdNotFound(t *testing.T) {
 }
 
 func TestCharacterDataBase_GetMovieById(t *testing.T) {
-	characterDb := characterDbInitialized()
+	characterDb := initDB()
 
 	character, err := characterDb.GetCharacterById(1)
 
@@ -94,33 +67,16 @@ func TestCharacterDataBase_GetMovieById(t *testing.T) {
 	assert.Equal(t, expected, character, "Should return Character for ID 1")
 }
 
-func TestCharacterDataBase_AddCharacter_DBNotInitialized(t *testing.T) {
-	characterDb := characterDbNotInitialized()
-
-	_, err := characterDb.AddCharacter(createOtherCharacter())
-
-	assert.EqualError(t, err, "Character database not initialized!", "Should return error for not initialized DB")
-}
-
 func TestCharacterDataBase_AddCharacter(t *testing.T) {
-	characterDb := characterDbInitialized()
+	characterDb := initDB()
 
-	newCharacterId, err := characterDb.AddCharacter(createOtherCharacter())
-	assert.Nil(t, err, "No error")
+	newCharacterId := characterDb.AddCharacter(createOtherCharacter())
 	assert.Greater(t, newCharacterId, uint64(0), "Should add new character to db and return its ID")
 	assert.Len(t, characterDb.db, 2, "Should be 2 characters in DB")
 }
 
-func TestCharacterDataBase_UpdateCharacter_DBNotInitialized(t *testing.T) {
-	characterDb := characterDbNotInitialized()
-
-	_, err := characterDb.UpdateCharacter(1, createOtherCharacter())
-
-	assert.EqualError(t, err, "Character database not initialized!", "Should return error for not initialized DB")
-}
-
 func TestCharacterDataBase_UpdateCharacter_IdNotFound(t *testing.T) {
-	characterDb := characterDbInitialized()
+	characterDb := initDB()
 
 	_, err := characterDb.UpdateCharacter(1000, createOtherCharacter())
 
@@ -128,7 +84,7 @@ func TestCharacterDataBase_UpdateCharacter_IdNotFound(t *testing.T) {
 }
 
 func TestCharacterDataBase_UpdateCharacter(t *testing.T) {
-	characterDb := characterDbInitialized()
+	characterDb := initDB()
 
 	characterUpdated, err := characterDb.UpdateCharacter(1, createOtherCharacter())
 
@@ -139,16 +95,8 @@ func TestCharacterDataBase_UpdateCharacter(t *testing.T) {
 	assert.Equal(t, characterDb.db[1].MovieId, OTHER_MOVIE_ID, "MovieId should be updated")
 }
 
-func TestCharacterDataBase_DeleteCharacter_DBNotInitialized(t *testing.T) {
-	characterDb := characterDbNotInitialized()
-
-	_, err := characterDb.DeleteCharacter(1)
-
-	assert.EqualError(t, err, "Character database not initialized!", "Should return error for not initialized DB")
-}
-
 func TestCharacterDataBase_DeleteCharacter_IdNotFound(t *testing.T) {
-	characterDb := characterDbInitialized()
+	characterDb := initDB()
 
 	_, err := characterDb.DeleteCharacter(1000)
 
@@ -156,7 +104,7 @@ func TestCharacterDataBase_DeleteCharacter_IdNotFound(t *testing.T) {
 }
 
 func TestCharacterDataBase_DeleteCharacter(t *testing.T) {
-	characterDb := characterDbInitialized()
+	characterDb := initDB()
 
 	characterDeleted, err := characterDb.DeleteCharacter(1)
 

@@ -11,42 +11,42 @@ func main() {
 	movieDb := movie.NewMovieDataBase()
 	characterDb := character.NewCharacterDataBase()
 
-	m1, _ := movieDb.AddMovie(movie.NewMovie(movie.Config{
+	m1 := movieDb.AddMovie(movie.NewMovie(movie.Config{
 		Name: "Matrix",
 		Year: 1999,
 	}))
 
-	_, _ = characterDb.AddCharacter(character.NewCharacter(character.Config{
+	characterDb.AddCharacter(character.NewCharacter(character.Config{
 		Name:    "Neo",
 		MovieId: m1,
 	}))
 
-	_, _ = characterDb.AddCharacter(character.NewCharacter(character.Config{
+	characterDb.AddCharacter(character.NewCharacter(character.Config{
 		Name:    "Agent Smith",
 		MovieId: m1,
 	}))
 
-	m2, _ := movieDb.AddMovie(movie.NewMovie(movie.Config{
+	m2 := movieDb.AddMovie(movie.NewMovie(movie.Config{
 		Name: "Casino Rolaye",
 		Year: 2002,
 	}))
 
-	c1, _ := characterDb.AddCharacter(character.NewCharacter(character.Config{
+	c1 := characterDb.AddCharacter(character.NewCharacter(character.Config{
 		Name:    "Bames Jond",
 		MovieId: m2,
 	}))
 
-	c2, _ := characterDb.AddCharacter(character.NewCharacter(character.Config{
+	c2 := characterDb.AddCharacter(character.NewCharacter(character.Config{
 		Name:    "N",
 		MovieId: 2,
 	}))
 
-	m3, _ := movieDb.AddMovie(movie.NewMovie(movie.Config{
+	m3 := movieDb.AddMovie(movie.NewMovie(movie.Config{
 		Name: "Mandalorian",
 		Year: 2019,
 	}))
 
-	c3, _ := characterDb.AddCharacter(character.NewCharacter(character.Config{
+	c3 := characterDb.AddCharacter(character.NewCharacter(character.Config{
 		Name:    "Mando",
 		MovieId: m3,
 	}))
@@ -69,7 +69,7 @@ func main() {
 	_, _ = movieDb.DeleteMovie(m3)
 	_, _ = characterDb.DeleteCharacter(c3)
 
-	allMovies, _ := movieDb.GetAllMovies()
+	allMovies := movieDb.GetAllMovies()
 	fmt.Println("Movies:")
 	for _, movieEntry := range allMovies {
 		fmt.Println(movieEntry)
@@ -78,7 +78,7 @@ func main() {
 	fmt.Println()
 	fmt.Println()
 
-	allCharacters, _ := characterDb.GetAllCharacters()
+	allCharacters := characterDb.GetAllCharacters()
 	fmt.Println("Characters:")
 	for _, characterEntry := range allCharacters {
 		movieForCharacter, _ := movieDb.GetMovieById(characterEntry.MovieId)
