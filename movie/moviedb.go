@@ -6,17 +6,26 @@ import (
 	"strings"
 )
 
-type MovieDataBase struct {
+type MovieDataBase interface {
+	GetAll() []Movie
+	GetById(id uint64) (Movie, error)
+	Add(m Movie) uint64
+	Update(id uint64, u Movie) (bool, error)
+	Delete(id uint64) (bool, error)
+}
+
+type InMemoryMovieDataBase struct {
 	db map[uint64]Movie
 }
 
-func NewMovieDataBase() MovieDataBase {
-	return MovieDataBase{
+func NewInMemoryMovieDataBase() *InMemoryMovieDataBase {
+	fmt.Println("Elo")
+	return &InMemoryMovieDataBase{
 		db: make(map[uint64]Movie),
 	}
 }
 
-func (mdb MovieDataBase) String() string {
+func (mdb *InMemoryMovieDataBase) String() string {
 	var sb strings.Builder
 
 	for _, m := range mdb.db {
@@ -26,7 +35,7 @@ func (mdb MovieDataBase) String() string {
 	return sb.String()
 }
 
-func (mdb MovieDataBase) GetAll() []Movie {
+func (mdb *InMemoryMovieDataBase) GetAll() []Movie {
 	result := make([]Movie, len(mdb.db))
 
 	idx := 0
@@ -38,7 +47,7 @@ func (mdb MovieDataBase) GetAll() []Movie {
 	return result
 }
 
-func (mdb MovieDataBase) GetById(id uint64) (Movie, error) {
+func (mdb *InMemoryMovieDataBase) GetById(id uint64) (Movie, error) {
 	m, exists := mdb.db[id]
 
 	if !exists {
@@ -48,14 +57,14 @@ func (mdb MovieDataBase) GetById(id uint64) (Movie, error) {
 	return m, nil
 }
 
-func (mdb MovieDataBase) Add(m Movie) uint64 {
+func (mdb *InMemoryMovieDataBase) Add(m Movie) uint64 {
 	id := utils.GenerateId()
 	m.Id = id
 	mdb.db[id] = m
 	return id
 }
 
-func (mdb MovieDataBase) Update(id uint64, u Movie) (bool, error) {
+func (mdb *InMemoryMovieDataBase) Update(id uint64, u Movie) (bool, error) {
 	m, err := mdb.GetById(id)
 
 	if err != nil {
@@ -70,7 +79,7 @@ func (mdb MovieDataBase) Update(id uint64, u Movie) (bool, error) {
 	return true, nil
 }
 
-func (mdb MovieDataBase) Delete(id uint64) (bool, error) {
+func (mdb *InMemoryMovieDataBase) Delete(id uint64) (bool, error) {
 	_, err := mdb.GetById(id)
 
 	if err != nil {

@@ -15,7 +15,7 @@ import (
 )
 
 func oldMain() {
-	movieDb := movie.NewMovieDataBase()
+	movieDb := movie.NewInMemoryMovieDataBase()
 	characterDb := character.NewCharacterDataBase()
 
 	m1 := movieDb.Add(movie.New(
@@ -128,6 +128,10 @@ func main() {
 	fx.New(
 		fx.Provide(
 			NewHttpServer,
+			fx.Annotate(
+				movie.NewInMemoryMovieDataBase,
+				fx.As(new(movie.MovieDataBase)),
+			),
 			fx.Annotate(
 				NewServeMux,
 				fx.ParamTags(handlers.ROUTES_TAG),

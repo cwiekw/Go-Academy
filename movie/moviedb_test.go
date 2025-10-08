@@ -9,8 +9,8 @@ import (
 const OTHER_MOVIE = "Other Movie"
 const OTHER_YEAR = uint16(1993)
 
-func initDB() MovieDataBase {
-	return MovieDataBase{
+func initDB() InMemoryMovieDataBase {
+	return InMemoryMovieDataBase{
 		db: map[uint64]Movie{
 			1: {
 				Id:   1,
@@ -29,15 +29,15 @@ func createOtherMovie() Movie {
 }
 
 func TestNewMovieDataBase(t *testing.T) {
-	result := NewMovieDataBase()
+	result := NewInMemoryMovieDataBase()
 
 	expected := make(map[uint64]Movie)
 
-	assert.Equal(t, expected, result.db, "NewMovieDataBase should initialize DB with empty map")
+	assert.Equal(t, expected, result.db, "NewInMemoryMovieDataBase should initialize DB with empty map")
 }
 
 func TestMovieDataBaseCreateWithoutNew(t *testing.T) {
-	result := MovieDataBase{}
+	result := InMemoryMovieDataBase{}
 
 	assert.Nil(t, result.db, "DB should be nil when creating directly")
 }
