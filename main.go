@@ -2,12 +2,19 @@ package main
 
 import (
 	"MovieManager/character"
+	"MovieManager/handlers"
 	"MovieManager/movie"
+	"context"
 	"fmt"
+	"net"
+	"net/http"
+
+	"go.uber.org/fx"
+	"go.uber.org/fx/fxevent"
+	"go.uber.org/zap"
 )
 
-func main() {
-
+func oldMain() {
 	movieDb := movie.NewMovieDataBase()
 	characterDb := character.NewCharacterDataBase()
 
@@ -84,4 +91,57 @@ func main() {
 		movieForCharacter, _ := movieDb.GetById(characterEntry.MovieId)
 		fmt.Printf("%s: %s\n", characterEntry.Name, movieForCharacter.Name)
 	}
+}
+
+func NewServeMux(routes []handlers.Route) *http.ServeMux {
+	mux := http.NewServeMux()
+
+	for _, route := range routes {
+		mux.Handle(route.Pattern(), route)
+	}
+	return mux
+}
+
+func NewHttpServer(lc fx.Lifecycle, mux *http.ServeMux, log *zap.Logger) *http.Server {
+	srv := &http.Server{Addr: ":7734", Handler: mux}
+
+	lc.Append(fx.Hook{
+		OnStart: func(ctx context.Context) error {
+			ln, err := net.Listen("tcp", srv.Addr)
+			if err != nil {
+				return err
+			}
+
+			log.Info("Starting HTTP server", zap.String("addr", srv.Addr))
+			go srv.Serve(ln)
+			return nil
+		},
+		OnStop: func(ctx context.Context) error {
+			return srv.Shutdown(ctx)
+		},
+	})
+
+	return srv
+}
+
+func main() {
+	fx.New(
+		fx.Provide(
+			NewHttpServer,
+			fx.Annotate(
+				NewServeMux,
+				fx.ParamTags(handlers.ROUTES_TAG),
+			),
+			handlers.AsRoute(handlers.NewHealthCheckHandler),
+			handlers.AsRoute(handlers.NewMovieHandler),
+			handlers.AsRoute(handlers.NewMMovieWithIDHandler),
+			handlers.AsRoute(handlers.NewCharacterHandler),
+			handlers.AsRoute(handlers.NewCharacterWithIDHandler),
+			zap.NewExample,
+		),
+		fx.Invoke(func(server *http.Server) {}),
+		fx.WithLogger(func(log *zap.Logger) fxevent.Logger {
+			return &fxevent.ZapLogger{Logger: log}
+		}),
+	).Run()
 }
