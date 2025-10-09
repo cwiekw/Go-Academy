@@ -9,8 +9,8 @@ import (
 const OTHER_CHARACTER = "Other character"
 const OTHER_MOVIE_ID = uint64(98765)
 
-func initDB() CharacterDataBase {
-	return CharacterDataBase{
+func initDB() InMemoryCharacterDataBase {
+	return InMemoryCharacterDataBase{
 		db: map[uint64]Character{
 			1: {
 				Id:      1,
@@ -29,11 +29,11 @@ func createOtherCharacter() Character {
 }
 
 func TestNewCharacterDataBase(t *testing.T) {
-	result := NewCharacterDataBase()
+	result := NewInMemoryCharacterDataBase()
 
 	expected := make(map[uint64]Character)
 
-	assert.Equal(t, expected, result.db, "NewCharacterDataBase should initialized DB with empty map")
+	assert.Equal(t, expected, result.db, "NewInMemoryCharacterDataBase should initialized DB with empty map")
 }
 
 func TestCharacterDataBase_GetAllCharacters(t *testing.T) {
