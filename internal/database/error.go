@@ -1,13 +1,6 @@
-package utils
+package database
 
-import (
-	"fmt"
-	"math/rand/v2"
-)
-
-func GenerateId() uint64 {
-	return rand.Uint64()
-}
+import "fmt"
 
 type EntityDoesNotExistError struct {
 	entityType string

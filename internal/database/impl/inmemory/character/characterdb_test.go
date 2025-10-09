@@ -1,17 +1,20 @@
 package character
 
 import (
+	"MovieManager/internal/entity/character"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
+const CHARACTER = "Character"
+const MOVIE_ID = uint64(12345)
 const OTHER_CHARACTER = "Other character"
 const OTHER_MOVIE_ID = uint64(98765)
 
-func initDB() CharacterDataBase {
-	return CharacterDataBase{
-		db: map[uint64]Character{
+func initDB() InMemoryCharacterDataBase {
+	return InMemoryCharacterDataBase{
+		db: map[uint64]character.Character{
 			1: {
 				Id:      1,
 				Name:    CHARACTER,
@@ -21,19 +24,19 @@ func initDB() CharacterDataBase {
 	}
 }
 
-func createOtherCharacter() Character {
-	return Character{
+func createOtherCharacter() character.Character {
+	return character.Character{
 		Name:    OTHER_CHARACTER,
 		MovieId: OTHER_MOVIE_ID,
 	}
 }
 
 func TestNewCharacterDataBase(t *testing.T) {
-	result := NewCharacterDataBase()
+	result := New()
 
-	expected := make(map[uint64]Character)
+	expected := make(map[uint64]character.Character)
 
-	assert.Equal(t, expected, result.db, "NewCharacterDataBase should initialized DB with empty map")
+	assert.Equal(t, expected, result.db, "New should initialized DB with empty map")
 }
 
 func TestCharacterDataBase_GetAllCharacters(t *testing.T) {
@@ -55,16 +58,16 @@ func TestCharacterDataBase_GetMovieById_IdNotFound(t *testing.T) {
 func TestCharacterDataBase_GetMovieById(t *testing.T) {
 	characterDb := initDB()
 
-	character, err := characterDb.GetById(1)
+	c, err := characterDb.GetById(1)
 
-	expected := Character{
+	expected := character.Character{
 		Id:      1,
 		Name:    CHARACTER,
 		MovieId: MOVIE_ID,
 	}
 
 	assert.Nil(t, err, "No error")
-	assert.Equal(t, expected, character, "Should return Character for ID 1")
+	assert.Equal(t, expected, c, "Should return Character for ID 1")
 }
 
 func TestCharacterDataBase_AddCharacter(t *testing.T) {
