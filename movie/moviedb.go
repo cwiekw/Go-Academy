@@ -19,7 +19,6 @@ type InMemoryMovieDataBase struct {
 }
 
 func NewInMemoryMovieDataBase() *InMemoryMovieDataBase {
-	fmt.Println("Elo")
 	return &InMemoryMovieDataBase{
 		db: make(map[uint64]Movie),
 	}
