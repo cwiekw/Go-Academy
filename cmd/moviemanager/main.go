@@ -6,8 +6,8 @@ import (
 	dbmovie "MovieManager/internal/database/impl/inmemory/movie"
 	"MovieManager/internal/web/handler"
 	hcharacter "MovieManager/internal/web/handler/character"
+	"MovieManager/internal/web/handler/healthcheck"
 	hmovie "MovieManager/internal/web/handler/movie"
-	"MovieManager/internal/web/healthcheck"
 	"MovieManager/internal/web/server"
 	"net/http"
 
