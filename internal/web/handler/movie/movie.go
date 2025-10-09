@@ -1,7 +1,8 @@
-package handlers
+package movie
 
 import (
-	"MovieManager/movie"
+	"MovieManager/internal/database"
+	emovie "MovieManager/internal/entity/movie"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -11,10 +12,10 @@ import (
 
 type MovieHandler struct {
 	log *zap.Logger
-	db  movie.MovieDataBase
+	db  database.MovieDataBase
 }
 
-func NewMovieHandler(log *zap.Logger, db movie.MovieDataBase) *MovieHandler {
+func NewMovieHandler(log *zap.Logger, db database.MovieDataBase) *MovieHandler {
 	return &MovieHandler{log: log, db: db}
 }
 
@@ -54,7 +55,7 @@ func (h *MovieHandler) getAll(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *MovieHandler) add(w http.ResponseWriter, r *http.Request) {
-	var m movie.Movie
+	var m emovie.Movie
 	err := json.NewDecoder(r.Body).Decode(&m)
 
 	if err != nil {

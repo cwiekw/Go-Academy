@@ -1,7 +1,7 @@
 package server
 
 import (
-	"MovieManager/handlers"
+	"MovieManager/internal/web/handler"
 	"context"
 	"net"
 	"net/http"
@@ -10,7 +10,7 @@ import (
 	"go.uber.org/zap"
 )
 
-func NewServeMux(routes []handlers.Route) *http.ServeMux {
+func NewServeMux(routes []handler.Route) *http.ServeMux {
 	mux := http.NewServeMux()
 
 	for _, route := range routes {

@@ -1,17 +1,20 @@
 package movie
 
 import (
+	"MovieManager/internal/entity/movie"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
+const MOVIE = "Movie"
+const YEAR = uint16(2017)
 const OTHER_MOVIE = "Other Movie"
 const OTHER_YEAR = uint16(1993)
 
 func initDB() InMemoryMovieDataBase {
 	return InMemoryMovieDataBase{
-		db: map[uint64]Movie{
+		db: map[uint64]movie.Movie{
 			1: {
 				Id:   1,
 				Name: MOVIE,
@@ -21,19 +24,19 @@ func initDB() InMemoryMovieDataBase {
 	}
 }
 
-func createOtherMovie() Movie {
-	return Movie{
+func createOtherMovie() movie.Movie {
+	return movie.Movie{
 		Name: OTHER_MOVIE,
 		Year: OTHER_YEAR,
 	}
 }
 
 func TestNewMovieDataBase(t *testing.T) {
-	result := NewInMemoryMovieDataBase()
+	result := New()
 
-	expected := make(map[uint64]Movie)
+	expected := make(map[uint64]movie.Movie)
 
-	assert.Equal(t, expected, result.db, "NewInMemoryMovieDataBase should initialize DB with empty map")
+	assert.Equal(t, expected, result.db, "New should initialize DB with empty map")
 }
 
 func TestMovieDataBaseCreateWithoutNew(t *testing.T) {
@@ -61,16 +64,16 @@ func TestMovieDataBase_GetMovieById_IdNotFound(t *testing.T) {
 func TestMovieDataBase_GetMovieById(t *testing.T) {
 	movieDb := initDB()
 
-	movie, err := movieDb.GetById(1)
+	m, err := movieDb.GetById(1)
 
-	expected := Movie{
+	expected := movie.Movie{
 		Id:   1,
 		Name: MOVIE,
 		Year: YEAR,
 	}
 
 	assert.Nil(t, err, "No error")
-	assert.Equal(t, expected, movie, "Should return Movie for ID 1")
+	assert.Equal(t, expected, m, "Should return Movie for ID 1")
 }
 
 func TestMovieDataBase_AddMovie(t *testing.T) {

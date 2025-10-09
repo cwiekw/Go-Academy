@@ -1,26 +1,20 @@
 package character
 
 import (
-	"MovieManager/utils"
+	"MovieManager/internal/database"
+	"MovieManager/internal/database/impl"
+	"MovieManager/internal/entity/character"
 	"fmt"
 	"strings"
 )
 
-type CharacterDataBase interface {
-	GetAll() []Character
-	GetById(id uint64) (Character, error)
-	Add(m Character) uint64
-	Update(id uint64, u Character) (bool, error)
-	Delete(id uint64) (bool, error)
-}
-
 type InMemoryCharacterDataBase struct {
-	db map[uint64]Character
+	db map[uint64]character.Character
 }
 
-func NewInMemoryCharacterDataBase() InMemoryCharacterDataBase {
+func New() InMemoryCharacterDataBase {
 	return InMemoryCharacterDataBase{
-		db: make(map[uint64]Character),
+		db: make(map[uint64]character.Character),
 	}
 }
 
@@ -34,8 +28,8 @@ func (cdb InMemoryCharacterDataBase) String() string {
 	return sb.String()
 }
 
-func (cdb InMemoryCharacterDataBase) GetAll() []Character {
-	result := make([]Character, len(cdb.db))
+func (cdb InMemoryCharacterDataBase) GetAll() []character.Character {
+	result := make([]character.Character, len(cdb.db))
 
 	idx := 0
 	for _, c := range cdb.db {
@@ -46,24 +40,24 @@ func (cdb InMemoryCharacterDataBase) GetAll() []Character {
 	return result
 }
 
-func (cdb InMemoryCharacterDataBase) GetById(id uint64) (Character, error) {
+func (cdb InMemoryCharacterDataBase) GetById(id uint64) (character.Character, error) {
 	c, exists := cdb.db[id]
 
 	if !exists {
-		return c, utils.NewEntityDoesNotExistError("Character", id)
+		return c, database.NewEntityDoesNotExistError("Character", id)
 	}
 
 	return c, nil
 }
 
-func (cdb InMemoryCharacterDataBase) Add(c Character) uint64 {
-	id := utils.GenerateId()
+func (cdb InMemoryCharacterDataBase) Add(c character.Character) uint64 {
+	id := impl.GenerateId()
 	c.Id = id
 	cdb.db[id] = c
 	return id
 }
 
-func (cdb InMemoryCharacterDataBase) Update(id uint64, u Character) (bool, error) {
+func (cdb InMemoryCharacterDataBase) Update(id uint64, u character.Character) (bool, error) {
 	c, err := cdb.GetById(id)
 
 	if err != nil {

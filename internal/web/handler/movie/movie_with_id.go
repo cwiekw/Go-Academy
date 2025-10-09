@@ -1,7 +1,8 @@
-package handlers
+package movie
 
 import (
-	"MovieManager/character"
+	"MovieManager/internal/database"
+	emovie "MovieManager/internal/entity/movie"
 	"encoding/json"
 	"net/http"
 	"strconv"
@@ -9,20 +10,20 @@ import (
 	"go.uber.org/zap"
 )
 
-type CharacterWithIDHandler struct {
+type MovieWithIDHandler struct {
 	log *zap.Logger
-	db  character.CharacterDataBase
+	db  database.MovieDataBase
 }
 
-func NewCharacterWithIDHandler(log *zap.Logger, db character.CharacterDataBase) *CharacterWithIDHandler {
-	return &CharacterWithIDHandler{log: log, db: db}
+func NewMMovieWithIDHandler(log *zap.Logger, db database.MovieDataBase) *MovieWithIDHandler {
+	return &MovieWithIDHandler{log: log, db: db}
 }
 
-func (*CharacterWithIDHandler) Pattern() string {
-	return "/characters/{id}"
+func (*MovieWithIDHandler) Pattern() string {
+	return "/movies/{id}"
 }
 
-func (h *CharacterWithIDHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (h *MovieWithIDHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	h.log.Info("ServeHTTP: Started", zap.String("URL", h.Pattern()), zap.String("Method", r.Method))
 
 	id, err := strconv.ParseUint(r.PathValue("id"), 10, 64)
@@ -50,7 +51,7 @@ func (h *CharacterWithIDHandler) ServeHTTP(w http.ResponseWriter, r *http.Reques
 	}
 }
 
-func (h *CharacterWithIDHandler) getById(w http.ResponseWriter, r *http.Request, id uint64) {
+func (h *MovieWithIDHandler) getById(w http.ResponseWriter, r *http.Request, id uint64) {
 	res, err := h.db.GetById(id)
 
 	if err != nil {
@@ -71,9 +72,9 @@ func (h *CharacterWithIDHandler) getById(w http.ResponseWriter, r *http.Request,
 	h.log.Info("ServeHTTP: Finished", zap.String("URL", h.Pattern()), zap.String("Method", r.Method), zap.Int("Status", http.StatusOK))
 }
 
-func (h *CharacterWithIDHandler) update(w http.ResponseWriter, r *http.Request, id uint64) {
-	var c character.Character
-	err := json.NewDecoder(r.Body).Decode(&c)
+func (h *MovieWithIDHandler) update(w http.ResponseWriter, r *http.Request, id uint64) {
+	var m emovie.Movie
+	err := json.NewDecoder(r.Body).Decode(&m)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -81,7 +82,7 @@ func (h *CharacterWithIDHandler) update(w http.ResponseWriter, r *http.Request, 
 		return
 	}
 
-	_, err = h.db.Update(id, c)
+	_, err = h.db.Update(id, m)
 
 	if err != nil {
 		http.Error(w, "Not found", http.StatusNotFound)
@@ -93,7 +94,7 @@ func (h *CharacterWithIDHandler) update(w http.ResponseWriter, r *http.Request, 
 	h.log.Info("ServeHTTP: Finished", zap.String("URL", h.Pattern()), zap.String("Method", r.Method), zap.Int("Status", http.StatusNoContent))
 }
 
-func (h *CharacterWithIDHandler) delete(w http.ResponseWriter, r *http.Request, id uint64) {
+func (h *MovieWithIDHandler) delete(w http.ResponseWriter, r *http.Request, id uint64) {
 	_, err := h.db.Delete(id)
 
 	if err != nil {

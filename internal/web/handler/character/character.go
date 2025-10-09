@@ -1,7 +1,8 @@
-package handlers
+package character
 
 import (
-	"MovieManager/character"
+	"MovieManager/internal/database"
+	echaracter "MovieManager/internal/entity/character"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -11,10 +12,10 @@ import (
 
 type CharacterHandler struct {
 	log *zap.Logger
-	db  character.CharacterDataBase
+	db  database.CharacterDataBase
 }
 
-func NewCharacterHandler(log *zap.Logger, db character.CharacterDataBase) *CharacterHandler {
+func NewCharacterHandler(log *zap.Logger, db database.CharacterDataBase) *CharacterHandler {
 	return &CharacterHandler{log: log, db: db}
 }
 
@@ -54,7 +55,7 @@ func (h *CharacterHandler) getAll(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *CharacterHandler) add(w http.ResponseWriter, r *http.Request) {
-	var c character.Character
+	var c echaracter.Character
 	err := json.NewDecoder(r.Body).Decode(&c)
 
 	if err != nil {

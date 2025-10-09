@@ -1,4 +1,4 @@
-package handlers
+package healthcheck
 
 import (
 	"fmt"

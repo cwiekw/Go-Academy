@@ -1,26 +1,20 @@
 package movie
 
 import (
-	"MovieManager/utils"
+	"MovieManager/internal/database"
+	"MovieManager/internal/database/impl"
+	"MovieManager/internal/entity/movie"
 	"fmt"
 	"strings"
 )
 
-type MovieDataBase interface {
-	GetAll() []Movie
-	GetById(id uint64) (Movie, error)
-	Add(m Movie) uint64
-	Update(id uint64, u Movie) (bool, error)
-	Delete(id uint64) (bool, error)
-}
-
 type InMemoryMovieDataBase struct {
-	db map[uint64]Movie
+	db map[uint64]movie.Movie
 }
 
-func NewInMemoryMovieDataBase() *InMemoryMovieDataBase {
+func New() *InMemoryMovieDataBase {
 	return &InMemoryMovieDataBase{
-		db: make(map[uint64]Movie),
+		db: make(map[uint64]movie.Movie),
 	}
 }
 
@@ -34,8 +28,8 @@ func (mdb *InMemoryMovieDataBase) String() string {
 	return sb.String()
 }
 
-func (mdb *InMemoryMovieDataBase) GetAll() []Movie {
-	result := make([]Movie, len(mdb.db))
+func (mdb *InMemoryMovieDataBase) GetAll() []movie.Movie {
+	result := make([]movie.Movie, len(mdb.db))
 
 	idx := 0
 	for _, m := range mdb.db {
@@ -46,24 +40,24 @@ func (mdb *InMemoryMovieDataBase) GetAll() []Movie {
 	return result
 }
 
-func (mdb *InMemoryMovieDataBase) GetById(id uint64) (Movie, error) {
+func (mdb *InMemoryMovieDataBase) GetById(id uint64) (movie.Movie, error) {
 	m, exists := mdb.db[id]
 
 	if !exists {
-		return m, utils.NewEntityDoesNotExistError("Movie", id)
+		return m, database.NewEntityDoesNotExistError("Movie", id)
 	}
 
 	return m, nil
 }
 
-func (mdb *InMemoryMovieDataBase) Add(m Movie) uint64 {
-	id := utils.GenerateId()
+func (mdb *InMemoryMovieDataBase) Add(m movie.Movie) uint64 {
+	id := impl.GenerateId()
 	m.Id = id
 	mdb.db[id] = m
 	return id
 }
 
-func (mdb *InMemoryMovieDataBase) Update(id uint64, u Movie) (bool, error) {
+func (mdb *InMemoryMovieDataBase) Update(id uint64, u movie.Movie) (bool, error) {
 	m, err := mdb.GetById(id)
 
 	if err != nil {
