@@ -1,0 +1,196 @@
+openapi: 3.0.0
+info:
+  title: Api
+  version: 1.0.0
+paths:
+  /movies:
+    get:
+      responses:
+        "200":
+          description: An array of movies
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Movie"
+    post:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Movie"
+      responses:
+        "201":
+          description: Created movie
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Movie"
+  /movies/{movieId}:
+    get:
+      parameters:
+        - in: path
+          name: movieId
+          schema:
+            type: integer
+            format: uint64
+          required: true
+      responses:
+        "200":
+          description: User with ID
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Movie"
+        "404":
+          description: When movie with provided ID doesn't exist
+    put:
+      parameters:
+        - in: path
+          name: movieId
+          schema:
+            type: integer
+            format: uint64
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Movie"
+      responses:
+        "204":
+          description: Movie updated
+        "404":
+          description: When movie with provided ID doesn't exist
+    delete:
+      parameters:
+        - in: path
+          name: movieId
+          schema:
+            type: integer
+            format: uint64
+          required: true
+      responses:
+        "204":
+          description: Movie deleted
+        "404":
+          description: When movie with provided ID doesn't exist
+  /characters:
+    get:
+      responses:
+        "200":
+          description: An array of characters
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Character"
+    post:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Character"
+      responses:
+        "201":
+          description: Created movie
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Character"
+  /characters/{characterId}:
+    get:
+      parameters:
+        - in: path
+          name: characterId
+          schema:
+            type: integer
+            format: uint64
+          required: true
+      responses:
+        "200":
+          description: User with ID
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Character"
+        "404":
+          description: When character with provided ID doesn't exist
+    put:
+      parameters:
+        - in: path
+          name: characterId
+          schema:
+            type: integer
+            format: uint64
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Character"
+      responses:
+        "204":
+          description: Character updated
+        "404":
+          description: When character with provided ID doesn't exist
+    delete:
+      parameters:
+        - in: path
+          name: characterId
+          schema:
+            type: integer
+            format: uint64
+          required: true
+      responses:
+        "204":
+          description: Character deleted
+        "404":
+          description: When character with provided ID doesn't exist
+
+components:
+  schemas:
+    Movie:
+      type: object
+      required: [name, year]
+      properties:
+        id:
+          type: integer
+          format: uint64
+          example: 1234
+        name:
+          type: string
+          example: Matrix
+          x-oapi-codegen-extra-tags:
+            validate: required
+        year:
+          type: integer
+          example: 1999
+          format: uint16
+          x-oapi-codegen-extra-tags:
+            validate: required,min=1888
+    Character:
+      type: object
+      required: [ name, movieId ]
+      properties:
+        id:
+          type: integer
+          format: uint64
+          example: 4321
+        name:
+          type: string
+          example: Neo
+          x-oapi-codegen-extra-tags:
+            validate: required
+        movieId:
+          type: integer
+          format: uint64
+          example: 1234
+          x-oapi-codegen-extra-tags:
+            validate: required
