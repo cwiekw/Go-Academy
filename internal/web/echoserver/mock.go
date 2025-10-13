@@ -1,11 +1,16 @@
-package movie
+package echoserver
 
 import (
 	"MovieManager/internal/database"
 	emovie "MovieManager/internal/entity/movie"
 
 	"github.com/stretchr/testify/mock"
+	"go.uber.org/zap"
 )
+
+func newServer() *Server {
+	return New(zap.NewNop(), newMockMovieDataBase(), nil)
+}
 
 type mockMovieDataBase struct {
 	mock.Mock

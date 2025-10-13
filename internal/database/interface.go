@@ -8,7 +8,7 @@ import (
 type MovieDataBase interface {
 	GetAll() []movie.Movie
 	GetById(id uint64) (movie.Movie, error)
-	Add(m movie.Movie) uint64
+	Add(m movie.Movie) movie.Movie
 	Update(id uint64, u movie.Movie) (bool, error)
 	Delete(id uint64) (bool, error)
 }

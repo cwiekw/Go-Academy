@@ -50,11 +50,11 @@ func (mdb *InMemoryMovieDataBase) GetById(id uint64) (movie.Movie, error) {
 	return m, nil
 }
 
-func (mdb *InMemoryMovieDataBase) Add(m movie.Movie) uint64 {
+func (mdb *InMemoryMovieDataBase) Add(m movie.Movie) movie.Movie {
 	id := impl.GenerateId()
 	m.Id = id
 	mdb.db[id] = m
-	return id
+	return mdb.db[id]
 }
 
 func (mdb *InMemoryMovieDataBase) Update(id uint64, u movie.Movie) (bool, error) {

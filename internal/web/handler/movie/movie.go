@@ -64,10 +64,10 @@ func (h *MovieHandler) add(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id := h.db.Add(m)
+	nm := h.db.Add(m)
 
 	w.WriteHeader(http.StatusCreated)
-	_, err = fmt.Fprintf(w, "%d", id)
+	_, err = fmt.Fprintf(w, "%d", nm.Id)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
