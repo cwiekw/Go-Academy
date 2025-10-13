@@ -4,6 +4,8 @@ import (
 	"MovieManager/internal/database"
 	echaracter "MovieManager/internal/entity/character"
 	emovie "MovieManager/internal/entity/movie"
+	"MovieManager/internal/validator"
+	"errors"
 
 	"github.com/stretchr/testify/mock"
 	"go.uber.org/zap"
@@ -11,9 +13,10 @@ import (
 
 var ID = uint64(1)
 var WRONG_ID = uint64(999)
+var MOVIE_ID = uint64(1001)
 
 func newServer() *Server {
-	return New(zap.NewNop(), newMockMovieDataBase(), newMockCharacterDataBase())
+	return New(zap.NewNop(), newMockMovieDataBase(), newMockCharacterDataBase(), newCharacterValidatorManager())
 }
 
 type mockMovieDataBase struct {
@@ -90,12 +93,12 @@ func newMockCharacterDataBase() *mockCharacterDataBase {
 
 	character := echaracter.Character{
 		Name:    "Character1",
-		MovieId: uint64(1001),
+		MovieId: MOVIE_ID,
 	}
 	characterWithId := echaracter.Character{
 		Id:      ID,
 		Name:    "Character1",
-		MovieId: uint64(1001),
+		MovieId: MOVIE_ID,
 	}
 
 	m.On("GetAll").Return([]echaracter.Character{
@@ -144,4 +147,30 @@ func (m *mockCharacterDataBase) Update(id uint64, u echaracter.Character) (bool,
 func (m *mockCharacterDataBase) Delete(id uint64) (bool, error) {
 	args := m.Called(id)
 	return args.Bool(0), args.Error(1)
+}
+
+type mockCharacterValidator struct {
+	mock.Mock
+}
+
+func newMockCharacterValidator() *mockCharacterValidator {
+	v := &mockCharacterValidator{}
+
+	v.On("Validate", "Character1").Return(true, nil)
+	v.On("Validate", "Character2").Return(false, nil)
+	v.On("Validate", "Character3").Return(false, errors.New("E"))
+
+	return v
+}
+
+func (m *mockCharacterValidator) Validate(name string) (bool, error) {
+	args := m.Called(name)
+	return args.Bool(0), args.Error(1)
+}
+
+func newCharacterValidatorManager() validator.CharacterValidatorManager {
+	vm := validator.NewCharacterValidatorManager()
+	vm.AddValidator(MOVIE_ID, newMockCharacterValidator())
+
+	return *vm
 }

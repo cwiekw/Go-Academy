@@ -103,6 +103,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Character"
+        "412":
+          description: Validation for movie failed
+        "500":
+          description: Failed on some step
   /characters/{characterId}:
     get:
       parameters:

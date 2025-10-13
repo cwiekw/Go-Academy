@@ -285,6 +285,22 @@ func (response PostCharacters201JSONResponse) VisitPostCharactersResponse(w http
 	return json.NewEncoder(w).Encode(response)
 }
 
+type PostCharacters412Response struct {
+}
+
+func (response PostCharacters412Response) VisitPostCharactersResponse(w http.ResponseWriter) error {
+	w.WriteHeader(412)
+	return nil
+}
+
+type PostCharacters500Response struct {
+}
+
+func (response PostCharacters500Response) VisitPostCharactersResponse(w http.ResponseWriter) error {
+	w.WriteHeader(500)
+	return nil
+}
+
 type DeleteCharactersCharacterIdRequestObject struct {
 	CharacterId uint64 `json:"characterId"`
 }

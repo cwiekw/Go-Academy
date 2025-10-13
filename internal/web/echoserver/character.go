@@ -36,7 +36,19 @@ func (s Server) GetCharactersCharacterId(_ context.Context, request api.GetChara
 
 func (s Server) PostCharacters(_ context.Context, request api.PostCharactersRequestObject) (api.PostCharactersResponseObject, error) {
 	s.log.Info("PostCharacters", zap.String("action", "started"))
+
 	c := mapper.MapCharacterDtoToEntity(*request.Body)
+	validated, err := s.validatorManager.Validate(c.MovieId, c.Name)
+
+	if err != nil {
+		s.log.Error("PostCharacters", zap.String("action", "validation failed"), zap.Error(err))
+		return api.PostCharacters500Response{}, err
+	}
+
+	if !validated {
+		s.log.Info("PostCharacters", zap.String("action", "validation does not allow character for movie. Breaking"))
+		return api.PostCharacters412Response{}, nil
+	}
 
 	cm := s.characterDb.Add(c)
 

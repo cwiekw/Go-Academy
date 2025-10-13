@@ -18,7 +18,7 @@ func TestServer_GetCharacters(t *testing.T) {
 		{
 			Id:      &ID,
 			Name:    "Character1",
-			MovieId: uint64(1001),
+			MovieId: MOVIE_ID,
 		},
 		{
 			Id:      &WRONG_ID,
@@ -39,7 +39,7 @@ func TestServer_GetCharactersCharacterId(t *testing.T) {
 	expected := api.GetCharactersCharacterId200JSONResponse{
 		Id:      &ID,
 		Name:    "Character1",
-		MovieId: uint64(1001),
+		MovieId: MOVIE_ID,
 	}
 
 	assert.Equal(t, expected, res, "Should return character by ID")
@@ -62,16 +62,45 @@ func TestServer_PostCharacters(t *testing.T) {
 
 	res, _ := s.PostCharacters(c, api.PostCharactersRequestObject{Body: &api.Character{
 		Name:    "Character1",
-		MovieId: uint64(1001),
+		MovieId: MOVIE_ID,
 	}})
 
 	expected := api.PostCharacters201JSONResponse(api.Character{
 		Id:      &ID,
 		Name:    "Character1",
-		MovieId: uint64(1001),
+		MovieId: MOVIE_ID,
 	})
 
 	assert.Equal(t, expected, res, "Should add new character and return it with 201 entity")
+}
+
+func TestServer_PostCharacters_ValidationFailed(t *testing.T) {
+	s := newServer()
+	c := context.Background()
+
+	res, _ := s.PostCharacters(c, api.PostCharactersRequestObject{Body: &api.Character{
+		Name:    "Character2",
+		MovieId: MOVIE_ID,
+	}})
+
+	expected := api.PostCharacters412Response{}
+
+	assert.Equal(t, expected, res, "Should fail validation and return 412 entity")
+}
+
+func TestServer_PostCharacters_ValidationError(t *testing.T) {
+	s := newServer()
+	c := context.Background()
+
+	res, err := s.PostCharacters(c, api.PostCharactersRequestObject{Body: &api.Character{
+		Name:    "Character3",
+		MovieId: MOVIE_ID,
+	}})
+
+	expected := api.PostCharacters500Response{}
+
+	assert.Equal(t, expected, res, "Validation should throw error and return 500 entity")
+	assert.Error(t, err, "Error should be there")
 }
 
 func TestServer_PutCharactersCharacterId(t *testing.T) {
@@ -82,7 +111,7 @@ func TestServer_PutCharactersCharacterId(t *testing.T) {
 		CharacterId: ID,
 		Body: &api.Character{
 			Name:    "Character1",
-			MovieId: uint64(1001),
+			MovieId: MOVIE_ID,
 		}})
 
 	expected := api.PutCharactersCharacterId204Response{}
@@ -98,7 +127,7 @@ func TestServer_PutCharactersCharacterId_NotFound(t *testing.T) {
 		CharacterId: WRONG_ID,
 		Body: &api.Character{
 			Name:    "Character1",
-			MovieId: uint64(1001),
+			MovieId: MOVIE_ID,
 		}})
 
 	expected := api.PutCharactersCharacterId404Response{}

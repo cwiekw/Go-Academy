@@ -2,6 +2,7 @@ package echoserver
 
 import (
 	"MovieManager/internal/database"
+	"MovieManager/internal/validator"
 	"MovieManager/internal/web/api"
 	"context"
 
@@ -11,24 +12,26 @@ import (
 )
 
 type Server struct {
-	log         *zap.Logger
-	movieDb     database.MovieDataBase
-	characterDb database.CharacterDataBase
+	log              *zap.Logger
+	movieDb          database.MovieDataBase
+	characterDb      database.CharacterDataBase
+	validatorManager validator.CharacterValidatorManager
 }
 
 var _ api.StrictServerInterface = (*Server)(nil)
 
-func New(log *zap.Logger, movieDb database.MovieDataBase, characterDb database.CharacterDataBase) *Server {
+func New(log *zap.Logger, movieDb database.MovieDataBase, characterDb database.CharacterDataBase, validatorManager validator.CharacterValidatorManager) *Server {
 	return &Server{
-		log:         log,
-		movieDb:     movieDb,
-		characterDb: characterDb,
+		log:              log,
+		movieDb:          movieDb,
+		characterDb:      characterDb,
+		validatorManager: validatorManager,
 	}
 }
 
-func NewEchoServer(lc fx.Lifecycle, log *zap.Logger, movieDb database.MovieDataBase, characterDb database.CharacterDataBase) *echo.Echo {
+func NewEchoServer(lc fx.Lifecycle, log *zap.Logger, movieDb database.MovieDataBase, characterDb database.CharacterDataBase, validatorManager *validator.CharacterValidatorManager) *echo.Echo {
 	e := echo.New()
-	handlers := New(log, movieDb, characterDb)
+	handlers := New(log, movieDb, characterDb, *validatorManager)
 
 	api.RegisterHandlersWithBaseURL(e, api.NewStrictHandler(handlers, []api.StrictMiddlewareFunc{}), "/api/v1")
 
