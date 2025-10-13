@@ -16,7 +16,7 @@ type MovieDataBase interface {
 type CharacterDataBase interface {
 	GetAll() []character.Character
 	GetById(id uint64) (character.Character, error)
-	Add(m character.Character) uint64
+	Add(m character.Character) character.Character
 	Update(id uint64, u character.Character) (bool, error)
 	Delete(id uint64) (bool, error)
 }

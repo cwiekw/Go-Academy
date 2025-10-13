@@ -8,26 +8,20 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var ID = uint64(1)
-var WRONG_ID = uint64(999)
-
 func TestServer_GetMovies(t *testing.T) {
 	s := newServer()
 	c := context.Background()
 
 	res, _ := s.GetMovies(c, api.GetMoviesRequestObject{})
 
-	id1 := uint64(1)
-	id2 := uint64(2)
-
 	expected := api.GetMovies200JSONResponse([]api.Movie{
 		{
-			Id:   &id1,
+			Id:   &ID,
 			Name: "Movie1",
 			Year: 2001,
 		},
 		{
-			Id:   &id2,
+			Id:   &WRONG_ID,
 			Name: "Movie2",
 			Year: 2002,
 		},
@@ -81,10 +75,12 @@ func TestServer_PutMoviesMovieId_NotFound(t *testing.T) {
 	s := newServer()
 	c := context.Background()
 
-	res, _ := s.PutMoviesMovieId(c, api.PutMoviesMovieIdRequestObject{MovieId: ID, Body: &api.Movie{
-		Name: "Movie1",
-		Year: 2001,
-	}})
+	res, _ := s.PutMoviesMovieId(c, api.PutMoviesMovieIdRequestObject{
+		MovieId: ID,
+		Body: &api.Movie{
+			Name: "Movie1",
+			Year: 2001,
+		}})
 
 	expected := api.PutMoviesMovieId204Response{}
 
@@ -95,10 +91,12 @@ func TestServer_PutMoviesMovieId(t *testing.T) {
 	s := newServer()
 	c := context.Background()
 
-	res, _ := s.PutMoviesMovieId(c, api.PutMoviesMovieIdRequestObject{MovieId: WRONG_ID, Body: &api.Movie{
-		Name: "Movie1",
-		Year: 2001,
-	}})
+	res, _ := s.PutMoviesMovieId(c, api.PutMoviesMovieIdRequestObject{
+		MovieId: WRONG_ID,
+		Body: &api.Movie{
+			Name: "Movie1",
+			Year: 2001,
+		}})
 
 	expected := api.PutMoviesMovieId404Response{}
 

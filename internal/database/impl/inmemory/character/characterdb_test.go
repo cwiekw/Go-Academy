@@ -73,8 +73,10 @@ func TestCharacterDataBase_GetMovieById(t *testing.T) {
 func TestCharacterDataBase_AddCharacter(t *testing.T) {
 	characterDb := initDB()
 
-	newCharacterId := characterDb.Add(createOtherCharacter())
-	assert.Greater(t, newCharacterId, uint64(0), "Should add new character to db and return its ID")
+	newCharacter := characterDb.Add(createOtherCharacter())
+	assert.Greater(t, newCharacter.Id, uint64(0), "Should add new character to db and return it. Generated ID should be greater than 0")
+	assert.Equal(t, OTHER_CHARACTER, newCharacter.Name, "Should add new character to db and return it. Name should be equal to provided one")
+	assert.Equal(t, OTHER_MOVIE_ID, newCharacter.MovieId, "Should add new character to db and return it. Year should be equal to provided one")
 	assert.Len(t, characterDb.db, 2, "Should be 2 characters in DB")
 }
 

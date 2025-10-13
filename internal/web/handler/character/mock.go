@@ -35,7 +35,7 @@ func newMockCharacterDataBase() *mockCharacterDataBase {
 		},
 	})
 
-	m.On("Add", character).Return(uint64(1))
+	m.On("Add", character).Return(characterWithId)
 
 	m.On("GetById", id).Return(characterWithId, nil)
 	m.On("GetById", wrongId).Return(echaracter.Character{}, database.NewEntityDoesNotExistError("Character", wrongId))
@@ -59,9 +59,9 @@ func (m *mockCharacterDataBase) GetById(id uint64) (echaracter.Character, error)
 	return args.Get(0).(echaracter.Character), args.Error(1)
 }
 
-func (m *mockCharacterDataBase) Add(em echaracter.Character) uint64 {
+func (m *mockCharacterDataBase) Add(em echaracter.Character) echaracter.Character {
 	args := m.Called(em)
-	return args.Get(0).(uint64)
+	return args.Get(0).(echaracter.Character)
 }
 
 func (m *mockCharacterDataBase) Update(id uint64, u echaracter.Character) (bool, error) {

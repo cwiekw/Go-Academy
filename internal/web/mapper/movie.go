@@ -1,6 +1,7 @@
 package mapper
 
 import (
+	"MovieManager/internal/entity/character"
 	"MovieManager/internal/entity/movie"
 	"MovieManager/internal/web/api"
 )
@@ -33,4 +34,35 @@ func MapMovieEntityToDto(m movie.Movie) api.Movie {
 		Name: m.Name,
 		Year: m.Year,
 	}
+}
+
+func MapCharacterDtoToEntity(c api.Character) character.Character {
+	var id uint64
+	if c.Id == nil {
+		id = 0
+	} else {
+		id = *c.Id
+	}
+
+	return character.Character{
+		Id:      id,
+		Name:    c.Name,
+		MovieId: c.MovieId,
+	}
+}
+
+func MapCharacterEntityToDto(c character.Character) api.Character {
+	var id *uint64
+	if c.Id == 0 {
+		id = nil
+	} else {
+		id = &c.Id
+	}
+
+	return api.Character{
+		Id:      id,
+		Name:    c.Name,
+		MovieId: c.MovieId,
+	}
+
 }

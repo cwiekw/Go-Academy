@@ -64,10 +64,10 @@ func (h *CharacterHandler) add(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id := h.db.Add(c)
+	nc := h.db.Add(c)
 
 	w.WriteHeader(http.StatusCreated)
-	_, err = fmt.Fprintf(w, "%d", id)
+	_, err = fmt.Fprintf(w, "%d", nc.Id)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
