@@ -33,7 +33,7 @@ func NewEchoServer(lc fx.Lifecycle, log *zap.Logger, movieDb database.MovieDataB
 	e := echo.New()
 	handlers := New(log, movieDb, characterDb, *validatorManager)
 
-	api.RegisterHandlersWithBaseURL(e, api.NewStrictHandler(handlers, []api.StrictMiddlewareFunc{}), "/api/v1")
+	api.RegisterHandlersWithBaseURL(e, api.NewStrictHandler(handlers, []api.StrictMiddlewareFunc{validator.ValidateStructMiddleware(log)}), "/api/v1")
 
 	lc.Append(fx.Hook{
 		OnStart: func(ctx context.Context) error {
