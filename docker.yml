@@ -1,0 +1,6 @@
+services:
+  movie-manager:
+    image: go-movie-manager
+    container_name: go-movie-manager
+    ports:
+      - 7734:7734
