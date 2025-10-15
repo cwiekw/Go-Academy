@@ -50,11 +50,11 @@ func (cdb InMemoryCharacterDataBase) GetById(id uint64) (character.Character, er
 	return c, nil
 }
 
-func (cdb InMemoryCharacterDataBase) Add(c character.Character) uint64 {
+func (cdb InMemoryCharacterDataBase) Add(c character.Character) character.Character {
 	id := impl.GenerateId()
 	c.Id = id
 	cdb.db[id] = c
-	return id
+	return cdb.db[id]
 }
 
 func (cdb InMemoryCharacterDataBase) Update(id uint64, u character.Character) (bool, error) {

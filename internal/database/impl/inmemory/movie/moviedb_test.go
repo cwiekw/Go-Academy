@@ -79,9 +79,11 @@ func TestMovieDataBase_GetMovieById(t *testing.T) {
 func TestMovieDataBase_AddMovie(t *testing.T) {
 	movieDb := initDB()
 
-	newMovieId := movieDb.Add(createOtherMovie())
+	newMovie := movieDb.Add(createOtherMovie())
 
-	assert.Greater(t, newMovieId, uint64(0), "Should add new movie to db and return its ID")
+	assert.Greater(t, newMovie.Id, uint64(0), "Should add new movie to db and return it. Generated ID should be greater than 0")
+	assert.Equal(t, OTHER_MOVIE, newMovie.Name, "Should add new movie to db and return it. Name should be equal to provided one")
+	assert.Equal(t, OTHER_YEAR, newMovie.Year, "Should add new movie to db and return it. Year should be equal to provided one")
 	assert.Len(t, movieDb.db, 2, "Should be 2 movies in DB")
 }
 
