@@ -4,57 +4,43 @@ import (
 	"MovieManager/internal/database"
 	"MovieManager/internal/database/impl"
 	"MovieManager/internal/entity/movie"
-	"fmt"
-	"strings"
+	"sync"
 )
 
 type InMemoryMovieDataBase struct {
-	db map[uint64]movie.Movie
+	db sync.Map
 }
 
 func New() *InMemoryMovieDataBase {
-	return &InMemoryMovieDataBase{
-		db: make(map[uint64]movie.Movie),
-	}
-}
-
-func (mdb *InMemoryMovieDataBase) String() string {
-	var sb strings.Builder
-
-	for _, m := range mdb.db {
-		sb.WriteString(fmt.Sprintf("%s\n", m))
-	}
-
-	return sb.String()
+	return &InMemoryMovieDataBase{}
 }
 
 func (mdb *InMemoryMovieDataBase) GetAll() []movie.Movie {
-	result := make([]movie.Movie, len(mdb.db))
+	result := make([]movie.Movie, 0)
 
-	idx := 0
-	for _, m := range mdb.db {
-		result[idx] = m
-		idx++
-	}
+	mdb.db.Range(func(_, value any) bool {
+		result = append(result, value.(movie.Movie))
+		return true
+	})
 
 	return result
 }
 
 func (mdb *InMemoryMovieDataBase) GetById(id uint64) (movie.Movie, error) {
-	m, exists := mdb.db[id]
+	m, exists := mdb.db.Load(id)
 
 	if !exists {
-		return m, database.NewEntityDoesNotExistError("Movie", id)
+		return movie.Movie{}, database.NewEntityDoesNotExistError("Movie", id)
 	}
 
-	return m, nil
+	return m.(movie.Movie), nil
 }
 
 func (mdb *InMemoryMovieDataBase) Add(m movie.Movie) movie.Movie {
 	id := impl.GenerateId()
 	m.Id = id
-	mdb.db[id] = m
-	return mdb.db[id]
+	mdb.db.Store(id, m)
+	return m
 }
 
 func (mdb *InMemoryMovieDataBase) Update(id uint64, u movie.Movie) (bool, error) {
@@ -67,7 +53,7 @@ func (mdb *InMemoryMovieDataBase) Update(id uint64, u movie.Movie) (bool, error)
 	m.Name = u.Name
 	m.Year = u.Year
 
-	mdb.db[id] = m
+	mdb.db.Store(id, m)
 
 	return true, nil
 }
@@ -79,7 +65,7 @@ func (mdb *InMemoryMovieDataBase) Delete(id uint64) (bool, error) {
 		return false, err
 	}
 
-	delete(mdb.db, id)
+	mdb.db.Delete(id)
 
 	return true, nil
 }

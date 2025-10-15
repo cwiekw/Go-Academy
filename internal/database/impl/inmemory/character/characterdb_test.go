@@ -12,16 +12,14 @@ const MOVIE_ID = uint64(12345)
 const OTHER_CHARACTER = "Other character"
 const OTHER_MOVIE_ID = uint64(98765)
 
-func initDB() InMemoryCharacterDataBase {
-	return InMemoryCharacterDataBase{
-		db: map[uint64]character.Character{
-			1: {
-				Id:      1,
-				Name:    CHARACTER,
-				MovieId: MOVIE_ID,
-			},
-		},
-	}
+func initDB() *InMemoryCharacterDataBase {
+	db := &InMemoryCharacterDataBase{}
+	db.db.Store(uint64(1), character.Character{
+		Id:      uint64(1),
+		Name:    CHARACTER,
+		MovieId: MOVIE_ID,
+	})
+	return db
 }
 
 func createOtherCharacter() character.Character {
@@ -29,14 +27,6 @@ func createOtherCharacter() character.Character {
 		Name:    OTHER_CHARACTER,
 		MovieId: OTHER_MOVIE_ID,
 	}
-}
-
-func TestNewCharacterDataBase(t *testing.T) {
-	result := New()
-
-	expected := make(map[uint64]character.Character)
-
-	assert.Equal(t, expected, result.db, "New should initialized DB with empty map")
 }
 
 func TestCharacterDataBase_GetAllCharacters(t *testing.T) {
@@ -47,7 +37,7 @@ func TestCharacterDataBase_GetAllCharacters(t *testing.T) {
 	assert.Len(t, characters, 1, "Should return list of Characters")
 }
 
-func TestCharacterDataBase_GetMovieById_IdNotFound(t *testing.T) {
+func TestCharacterDataBase_GetCharacterById_IdNotFound(t *testing.T) {
 	characterDb := initDB()
 
 	_, err := characterDb.GetById(1000)
@@ -55,13 +45,13 @@ func TestCharacterDataBase_GetMovieById_IdNotFound(t *testing.T) {
 	assert.EqualError(t, err, "Character entity for id 1000 does not exist!", "Should return error for not found ID")
 }
 
-func TestCharacterDataBase_GetMovieById(t *testing.T) {
+func TestCharacterDataBase_GetCharacterById(t *testing.T) {
 	characterDb := initDB()
 
-	c, err := characterDb.GetById(1)
+	c, err := characterDb.GetById(uint64(1))
 
 	expected := character.Character{
-		Id:      1,
+		Id:      uint64(1),
 		Name:    CHARACTER,
 		MovieId: MOVIE_ID,
 	}
@@ -77,7 +67,7 @@ func TestCharacterDataBase_AddCharacter(t *testing.T) {
 	assert.Greater(t, newCharacter.Id, uint64(0), "Should add new character to db and return it. Generated ID should be greater than 0")
 	assert.Equal(t, OTHER_CHARACTER, newCharacter.Name, "Should add new character to db and return it. Name should be equal to provided one")
 	assert.Equal(t, OTHER_MOVIE_ID, newCharacter.MovieId, "Should add new character to db and return it. Year should be equal to provided one")
-	assert.Len(t, characterDb.db, 2, "Should be 2 characters in DB")
+	assert.Len(t, characterDb.GetAll(), 2, "Should be 2 characters in DB")
 }
 
 func TestCharacterDataBase_UpdateCharacter_IdNotFound(t *testing.T) {
@@ -91,13 +81,17 @@ func TestCharacterDataBase_UpdateCharacter_IdNotFound(t *testing.T) {
 func TestCharacterDataBase_UpdateCharacter(t *testing.T) {
 	characterDb := initDB()
 
-	characterUpdated, err := characterDb.Update(1, createOtherCharacter())
+	isCharacterUpdated, err := characterDb.Update(1, createOtherCharacter())
 
 	assert.Nil(t, err, "No error")
-	assert.Equal(t, true, characterUpdated, "Should update Character for ID 1 and return true")
-	assert.Equal(t, characterDb.db[1].Id, uint64(1), "ID should stay the same")
-	assert.Equal(t, characterDb.db[1].Name, OTHER_CHARACTER, "Name should be updated")
-	assert.Equal(t, characterDb.db[1].MovieId, OTHER_MOVIE_ID, "MovieId should be updated")
+	assert.Equal(t, true, isCharacterUpdated, "Should update Character for ID 1 and return true")
+
+	v, _ := characterDb.db.Load(uint64(1))
+	updatedCharacter := v.(character.Character)
+
+	assert.Equal(t, updatedCharacter.Id, uint64(1), "ID should stay the same")
+	assert.Equal(t, updatedCharacter.Name, OTHER_CHARACTER, "Name should be updated")
+	assert.Equal(t, updatedCharacter.MovieId, OTHER_MOVIE_ID, "MovieId should be updated")
 }
 
 func TestCharacterDataBase_DeleteCharacter_IdNotFound(t *testing.T) {
@@ -111,9 +105,9 @@ func TestCharacterDataBase_DeleteCharacter_IdNotFound(t *testing.T) {
 func TestCharacterDataBase_DeleteCharacter(t *testing.T) {
 	characterDb := initDB()
 
-	characterDeleted, err := characterDb.Delete(1)
+	characterDeleted, err := characterDb.Delete(uint64(1))
 
 	assert.Nil(t, err, "No error")
 	assert.Equal(t, true, characterDeleted, "Should deleted Character for ID 1 and return true")
-	assert.Len(t, characterDb.db, 0, "DB should be empty after deleting character")
+	assert.Len(t, characterDb.GetAll(), 0, "DB should be empty after deleting character")
 }

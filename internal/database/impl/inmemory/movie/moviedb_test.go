@@ -12,16 +12,14 @@ const YEAR = uint16(2017)
 const OTHER_MOVIE = "Other Movie"
 const OTHER_YEAR = uint16(1993)
 
-func initDB() InMemoryMovieDataBase {
-	return InMemoryMovieDataBase{
-		db: map[uint64]movie.Movie{
-			1: {
-				Id:   1,
-				Name: MOVIE,
-				Year: YEAR,
-			},
-		},
-	}
+func initDB() *InMemoryMovieDataBase {
+	db := &InMemoryMovieDataBase{}
+	db.db.Store(uint64(1), movie.Movie{
+		Id:   uint64(1),
+		Name: MOVIE,
+		Year: YEAR,
+	})
+	return db
 }
 
 func createOtherMovie() movie.Movie {
@@ -29,20 +27,6 @@ func createOtherMovie() movie.Movie {
 		Name: OTHER_MOVIE,
 		Year: OTHER_YEAR,
 	}
-}
-
-func TestNewMovieDataBase(t *testing.T) {
-	result := New()
-
-	expected := make(map[uint64]movie.Movie)
-
-	assert.Equal(t, expected, result.db, "New should initialize DB with empty map")
-}
-
-func TestMovieDataBaseCreateWithoutNew(t *testing.T) {
-	result := InMemoryMovieDataBase{}
-
-	assert.Nil(t, result.db, "DB should be nil when creating directly")
 }
 
 func TestMovieDataBase_GetAllMovies(t *testing.T) {
@@ -64,10 +48,10 @@ func TestMovieDataBase_GetMovieById_IdNotFound(t *testing.T) {
 func TestMovieDataBase_GetMovieById(t *testing.T) {
 	movieDb := initDB()
 
-	m, err := movieDb.GetById(1)
+	m, err := movieDb.GetById(uint64(1))
 
 	expected := movie.Movie{
-		Id:   1,
+		Id:   uint64(1),
 		Name: MOVIE,
 		Year: YEAR,
 	}
@@ -84,7 +68,7 @@ func TestMovieDataBase_AddMovie(t *testing.T) {
 	assert.Greater(t, newMovie.Id, uint64(0), "Should add new movie to db and return it. Generated ID should be greater than 0")
 	assert.Equal(t, OTHER_MOVIE, newMovie.Name, "Should add new movie to db and return it. Name should be equal to provided one")
 	assert.Equal(t, OTHER_YEAR, newMovie.Year, "Should add new movie to db and return it. Year should be equal to provided one")
-	assert.Len(t, movieDb.db, 2, "Should be 2 movies in DB")
+	assert.Len(t, movieDb.GetAll(), 2, "Should be 2 movies in DB")
 }
 
 func TestMovieDataBase_UpdateMovie_IdNotFound(t *testing.T) {
@@ -98,13 +82,16 @@ func TestMovieDataBase_UpdateMovie_IdNotFound(t *testing.T) {
 func TestMovieDataBase_UpdateMovie(t *testing.T) {
 	movieDb := initDB()
 
-	movieUpdated, err := movieDb.Update(1, createOtherMovie())
+	isMovieUpdated, err := movieDb.Update(uint64(1), createOtherMovie())
 
 	assert.Nil(t, err, "No error")
-	assert.Equal(t, true, movieUpdated, "Should update Movie for ID 1 and return true")
-	assert.Equal(t, movieDb.db[1].Id, uint64(1), "ID should stay the same")
-	assert.Equal(t, movieDb.db[1].Name, OTHER_MOVIE, "Name should be updated")
-	assert.Equal(t, movieDb.db[1].Year, OTHER_YEAR, "Year should be updated")
+	assert.Equal(t, true, isMovieUpdated, "Should update Movie for ID 1 and return true")
+
+	v, _ := movieDb.db.Load(uint64(1))
+	updatedMovie := v.(movie.Movie)
+	assert.Equal(t, updatedMovie.Id, uint64(1), "ID should stay the same")
+	assert.Equal(t, updatedMovie.Name, OTHER_MOVIE, "Name should be updated")
+	assert.Equal(t, updatedMovie.Year, OTHER_YEAR, "Year should be updated")
 }
 
 func TestMovieDataBase_DeleteMovie_IdNotFound(t *testing.T) {
@@ -118,9 +105,9 @@ func TestMovieDataBase_DeleteMovie_IdNotFound(t *testing.T) {
 func TestMovieDataBase_DeleteMovie(t *testing.T) {
 	movieDb := initDB()
 
-	movieDeleted, err := movieDb.Delete(1)
+	movieDeleted, err := movieDb.Delete(uint64(1))
 
 	assert.Nil(t, err, "No error")
 	assert.Equal(t, true, movieDeleted, "Should delete Movie for ID 1 and return true")
-	assert.Len(t, movieDb.db, 0, "DB should be empty after deleting movie")
+	assert.Len(t, movieDb.GetAll(), 0, "DB should be empty after deleting movie")
 }
