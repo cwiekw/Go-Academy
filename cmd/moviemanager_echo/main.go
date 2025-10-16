@@ -1,6 +1,7 @@
 package main
 
 import (
+	"MovieManager/internal/cert"
 	"MovieManager/internal/database"
 	dbcharacter "MovieManager/internal/database/impl/inmemory/character"
 	dbmovie "MovieManager/internal/database/impl/inmemory/movie"
@@ -22,6 +23,7 @@ func main() {
 			echoserver.NewEchoServer,
 			fx.Annotate(dbmovie.New, fx.As(new(database.MovieDataBase))),
 			fx.Annotate(dbcharacter.New, fx.As(new(database.CharacterDataBase))),
+			fx.Annotate(cert.New, fx.As(new(cert.CertManager))),
 			validator.NewCharacterValidatorManager,
 			zap.NewExample,
 		),

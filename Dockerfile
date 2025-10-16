@@ -18,7 +18,10 @@ FROM alpine:3.19
 WORKDIR /root/
 
 COPY --from=builder /app/bin/moviemanager_echo/main .
+COPY --from=builder /app/certs ./certs
 
 EXPOSE 7734
 
+ENV GMM_CERT_PATH=certs/myCA.crt
+ENV GMM_KEY_PATH=certs/myCA.key
 CMD ["./main"]

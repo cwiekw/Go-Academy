@@ -1,9 +1,12 @@
 package echoserver
 
 import (
+	"MovieManager/internal/entity/movie"
 	"MovieManager/internal/web/api"
 	"MovieManager/internal/web/mapper"
+	"bytes"
 	"context"
+	"encoding/pem"
 
 	"go.uber.org/zap"
 )
@@ -36,7 +39,17 @@ func (s Server) GetMoviesMovieId(_ context.Context, request api.GetMoviesMovieId
 
 func (s Server) PostMovies(_ context.Context, request api.PostMoviesRequestObject) (api.PostMoviesResponseObject, error) {
 	s.log.Info("PostMovies", zap.String("action", "started"))
-	m := mapper.MapMovieDtoToEntity(*request.Body)
+	b := request.Body
+	cert, key, err := s.certManager.GenerateCertificateBasedOnCACert()
+	if err != nil {
+		return nil, err
+	}
+
+	m := movie.New(
+		movie.WithName(b.Name),
+		movie.WithYear(b.Year),
+		movie.WithCert(cert, key),
+	)
 
 	nm := s.movieDb.Add(m)
 
@@ -68,4 +81,27 @@ func (s Server) DeleteMoviesMovieId(_ context.Context, request api.DeleteMoviesM
 
 	s.log.Info("DeleteMoviesMovieId", zap.String("action", "finished"))
 	return api.DeleteMoviesMovieId204Response{}, nil
+}
+
+func (s Server) GetMoviesMovieIdCert(_ context.Context, request api.GetMoviesMovieIdCertRequestObject) (api.GetMoviesMovieIdCertResponseObject, error) {
+	s.log.Info("GetMoviesMovieIdCert", zap.String("action", "started"))
+	m, err := s.movieDb.GetById(request.MovieId)
+	if err != nil {
+		s.log.Info("GetMoviesMovieIdCert", zap.String("action", "failed"), zap.Error(err))
+		return api.GetMoviesMovieIdCert404Response{}, nil
+	}
+
+	buf := new(bytes.Buffer)
+
+	err = pem.Encode(buf, &pem.Block{Type: "CERTIFICATE", Bytes: m.GetCert().Raw})
+	if err != nil {
+		return nil, err
+	}
+
+	var res api.GetMoviesMovieIdCert200TextResponse
+
+	res = api.GetMoviesMovieIdCert200TextResponse(buf.String())
+
+	s.log.Info("GetMoviesMovieIdCert", zap.String("action", "finished"))
+	return res, nil
 }

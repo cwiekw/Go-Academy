@@ -1,6 +1,8 @@
 package movie
 
 import (
+	"crypto/rsa"
+	"crypto/x509"
 	"fmt"
 )
 
@@ -8,6 +10,8 @@ type Movie struct {
 	Id   uint64
 	Name string
 	Year uint16
+	cert *x509.Certificate
+	key  *rsa.PrivateKey
 }
 
 func New(options ...func(*Movie)) Movie {
@@ -30,6 +34,21 @@ func WithYear(year uint16) func(*Movie) {
 	return func(m *Movie) {
 		m.Year = year
 	}
+}
+
+func WithCert(cert *x509.Certificate, key *rsa.PrivateKey) func(*Movie) {
+	return func(m *Movie) {
+		m.cert = cert
+		m.key = key
+	}
+}
+
+func (m Movie) GetCert() *x509.Certificate {
+	return m.cert
+}
+
+func (m Movie) GetKey() *rsa.PrivateKey {
+	return m.key
 }
 
 func (m Movie) String() string {
