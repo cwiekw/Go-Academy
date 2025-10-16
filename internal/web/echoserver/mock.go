@@ -5,6 +5,8 @@ import (
 	echaracter "MovieManager/internal/entity/character"
 	emovie "MovieManager/internal/entity/movie"
 	"MovieManager/internal/validator"
+	"crypto/rsa"
+	"crypto/x509"
 	"errors"
 
 	"github.com/stretchr/testify/mock"
@@ -14,9 +16,11 @@ import (
 var ID = uint64(1)
 var WRONG_ID = uint64(999)
 var MOVIE_ID = uint64(1001)
+var CRT = &x509.Certificate{}
+var KEY = &rsa.PrivateKey{}
 
 func newServer() *Server {
-	return New(zap.NewNop(), newMockMovieDataBase(), newMockCharacterDataBase(), newCharacterValidatorManager())
+	return New(zap.NewNop(), newMockMovieDataBase(), newMockCharacterDataBase(), newCharacterValidatorManager(), newMockCertManager())
 }
 
 type mockMovieDataBase struct {
@@ -26,15 +30,24 @@ type mockMovieDataBase struct {
 func newMockMovieDataBase() *mockMovieDataBase {
 	m := &mockMovieDataBase{}
 
-	movie := emovie.Movie{
-		Name: "Movie1",
-		Year: 2001,
-	}
-	movieWithId := emovie.Movie{
-		Id:   ID,
-		Name: "Movie1",
-		Year: 2001,
-	}
+	movie := emovie.New(
+		emovie.WithName("Movie1"),
+		emovie.WithYear(2001),
+		emovie.WithCert(CRT, KEY),
+	)
+
+	simpleMovie := emovie.New(
+		emovie.WithName("Movie1"),
+		emovie.WithYear(2001),
+	)
+
+	movieWithId := emovie.New(
+		emovie.WithName("Movie1"),
+		emovie.WithYear(2001),
+		emovie.WithCert(CRT, KEY),
+	)
+
+	movieWithId.Id = ID
 
 	m.On("GetAll").Return([]emovie.Movie{
 		movieWithId,
@@ -48,10 +61,11 @@ func newMockMovieDataBase() *mockMovieDataBase {
 	m.On("Add", movie).Return(movieWithId)
 
 	m.On("GetById", ID).Return(movieWithId, nil)
+	m.On("GetById", MOVIE_ID).Return(movieWithId, nil)
 	m.On("GetById", WRONG_ID).Return(emovie.Movie{}, database.NewEntityDoesNotExistError("Movie", WRONG_ID))
 
-	m.On("Update", ID, movie).Return(true, nil)
-	m.On("Update", WRONG_ID, movie).Return(false, database.NewEntityDoesNotExistError("Movie", WRONG_ID))
+	m.On("Update", ID, simpleMovie).Return(true, nil)
+	m.On("Update", WRONG_ID, simpleMovie).Return(false, database.NewEntityDoesNotExistError("Movie", WRONG_ID))
 
 	m.On("Delete", ID).Return(true, nil)
 	m.On("Delete", WRONG_ID).Return(false, database.NewEntityDoesNotExistError("Movie", WRONG_ID))
@@ -91,15 +105,24 @@ type mockCharacterDataBase struct {
 func newMockCharacterDataBase() *mockCharacterDataBase {
 	m := &mockCharacterDataBase{}
 
-	character := echaracter.Character{
-		Name:    "Character1",
-		MovieId: MOVIE_ID,
-	}
-	characterWithId := echaracter.Character{
-		Id:      ID,
-		Name:    "Character1",
-		MovieId: MOVIE_ID,
-	}
+	character := echaracter.New(
+		echaracter.WithName("Character1"),
+		echaracter.WithMovieId(MOVIE_ID),
+		echaracter.WithCert(CRT, KEY),
+	)
+
+	simpleCharacter := echaracter.New(
+		echaracter.WithName("Character1"),
+		echaracter.WithMovieId(MOVIE_ID),
+	)
+
+	characterWithId := echaracter.New(
+		echaracter.WithName("Character1"),
+		echaracter.WithMovieId(MOVIE_ID),
+		echaracter.WithCert(CRT, KEY),
+	)
+
+	characterWithId.Id = ID
 
 	m.On("GetAll").Return([]echaracter.Character{
 		characterWithId,
@@ -115,8 +138,8 @@ func newMockCharacterDataBase() *mockCharacterDataBase {
 	m.On("GetById", ID).Return(characterWithId, nil)
 	m.On("GetById", WRONG_ID).Return(echaracter.Character{}, database.NewEntityDoesNotExistError("Character", WRONG_ID))
 
-	m.On("Update", ID, character).Return(true, nil)
-	m.On("Update", WRONG_ID, character).Return(false, database.NewEntityDoesNotExistError("Character", WRONG_ID))
+	m.On("Update", ID, simpleCharacter).Return(true, nil)
+	m.On("Update", WRONG_ID, simpleCharacter).Return(false, database.NewEntityDoesNotExistError("Character", WRONG_ID))
 
 	m.On("Delete", ID).Return(true, nil)
 	m.On("Delete", WRONG_ID).Return(false, database.NewEntityDoesNotExistError("Character", WRONG_ID))
@@ -173,4 +196,27 @@ func newCharacterValidatorManager() validator.CharacterValidatorManager {
 	vm.AddValidator(MOVIE_ID, newMockCharacterValidator())
 
 	return *vm
+}
+
+type mockCertManager struct {
+	mock.Mock
+}
+
+func (m *mockCertManager) GenerateCertificateBasedOnCACert() (*x509.Certificate, *rsa.PrivateKey, error) {
+	args := m.Called()
+	return args.Get(0).(*x509.Certificate), args.Get(1).(*rsa.PrivateKey), args.Error(2)
+}
+
+func (m *mockCertManager) GenerateCertificateBasedOnCert(inCert *x509.Certificate, inKey *rsa.PrivateKey) (*x509.Certificate, *rsa.PrivateKey, error) {
+	args := m.Called(inCert, inKey)
+	return args.Get(0).(*x509.Certificate), args.Get(1).(*rsa.PrivateKey), args.Error(2)
+}
+
+func newMockCertManager() *mockCertManager {
+	m := &mockCertManager{}
+
+	m.On("GenerateCertificateBasedOnCACert").Return(CRT, KEY, nil)
+	m.On("GenerateCertificateBasedOnCert", mock.Anything, mock.Anything).Return(CRT, KEY, nil)
+
+	return m
 }

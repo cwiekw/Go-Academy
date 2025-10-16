@@ -2,8 +2,6 @@ package validator
 
 import (
 	"encoding/json"
-	"fmt"
-	"strings"
 
 	"github.com/go-resty/resty/v2"
 )
@@ -27,9 +25,9 @@ func NewStarWarsCharacterValidator() *StarWarsCharacterValidator {
 }
 
 func (c StarWarsCharacterValidator) Validate(name string) (bool, error) {
-	url := strings.ReplaceAll(fmt.Sprintf("https://swapi.dev/api/people/?search=%s", name), " ", "%20")
-
-	response, err := c.httpClient.R().Get(url)
+	response, err := c.httpClient.R().
+		SetQueryParam("search", name).
+		Get("https://swapi.dev/api/people")
 
 	if err != nil {
 		return false, err

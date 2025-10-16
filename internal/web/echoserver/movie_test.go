@@ -71,7 +71,7 @@ func TestServer_PostMovies(t *testing.T) {
 	assert.Equal(t, expected, res, "Should add new movie and return it with 201 entity")
 }
 
-func TestServer_PutMoviesMovieId_NotFound(t *testing.T) {
+func TestServer_PutMoviesMovieId(t *testing.T) {
 	s := newServer()
 	c := context.Background()
 
@@ -87,7 +87,7 @@ func TestServer_PutMoviesMovieId_NotFound(t *testing.T) {
 	assert.Equal(t, expected, res, "Should update movie and return 204 entity")
 }
 
-func TestServer_PutMoviesMovieId(t *testing.T) {
+func TestServer_PutMoviesMovieId_NotFound(t *testing.T) {
 	s := newServer()
 	c := context.Background()
 

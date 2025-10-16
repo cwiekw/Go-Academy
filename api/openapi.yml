@@ -78,6 +78,24 @@ paths:
           description: Movie deleted
         "404":
           description: When movie with provided ID doesn't exist
+  /movies/{movieId}/cert:
+    get:
+      parameters:
+        - in: path
+          name: movieId
+          schema:
+            type: integer
+            format: uint64
+          required: true
+      responses:
+        "200":
+          description: Certificate in PEM format
+          content:
+            text/plain:
+              schema:
+                type: string
+        "404":
+          description: When character with provided ID doesn't exist
   /characters:
     get:
       responses:
@@ -155,6 +173,24 @@ paths:
       responses:
         "204":
           description: Character deleted
+        "404":
+          description: When character with provided ID doesn't exist
+  /characters/{characterId}/cert:
+    get:
+      parameters:
+        - in: path
+          name: characterId
+          schema:
+            type: integer
+            format: uint64
+          required: true
+      responses:
+        "200":
+          description: Certificate in PEM format
+          content:
+            text/plain:
+              schema:
+                type: string
         "404":
           description: When character with provided ID doesn't exist
 

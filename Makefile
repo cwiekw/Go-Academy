@@ -1,6 +1,11 @@
 build:
 	go build -o ./bin/moviemanager_echo/main ./cmd/moviemanager_echo/main.go
 
+generate:
+	go generate ./...
+
+run: export GMM_CERT_PATH=certs/myCA.crt
+run: export GMM_KEY_PATH=certs/myCA.key
 run:
 	go run ./cmd/moviemanager_echo/main.go
 
@@ -24,3 +29,8 @@ docker-compose:
 
 docker-compose-down:
 	docker compose -f docker.yml down
+
+cacerts:
+	rm -rf certs && mkdir certs
+	openssl genrsa -out ./certs/myCA.key 2048 #no encoding as OOTB go doesn't support encoded private key
+	openssl req -x509 -new -nodes -key ./certs/myCA.key -sha256 -days 365 -out ./certs/myCA.crt

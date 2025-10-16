@@ -1,9 +1,12 @@
 package echoserver
 
 import (
+	"MovieManager/internal/entity/character"
 	"MovieManager/internal/web/api"
 	"MovieManager/internal/web/mapper"
+	"bytes"
 	"context"
+	"encoding/pem"
 
 	"go.uber.org/zap"
 )
@@ -37,8 +40,14 @@ func (s Server) GetCharactersCharacterId(_ context.Context, request api.GetChara
 func (s Server) PostCharacters(_ context.Context, request api.PostCharactersRequestObject) (api.PostCharactersResponseObject, error) {
 	s.log.Info("PostCharacters", zap.String("action", "started"))
 
-	c := mapper.MapCharacterDtoToEntity(*request.Body)
-	validated, err := s.validatorManager.Validate(c.MovieId, c.Name)
+	b := request.Body
+
+	m, err := s.movieDb.GetById(b.MovieId)
+	if err != nil {
+		s.log.Info("PostCharacters", zap.String("action", "Movie for provided ID doesn't exist"))
+		return api.PostCharacters412Response{}, nil
+	}
+	validated, err := s.validatorManager.Validate(b.MovieId, b.Name)
 
 	if err != nil {
 		s.log.Error("PostCharacters", zap.String("action", "validation failed"), zap.Error(err))
@@ -49,6 +58,18 @@ func (s Server) PostCharacters(_ context.Context, request api.PostCharactersRequ
 		s.log.Info("PostCharacters", zap.String("action", "validation does not allow character for movie. Breaking"))
 		return api.PostCharacters412Response{}, nil
 	}
+
+	cert, key, err := s.certManager.GenerateCertificateBasedOnCert(m.GetCert(), m.GetKey())
+
+	if err != nil {
+		return nil, err
+	}
+
+	c := character.New(
+		character.WithName(b.Name),
+		character.WithMovieId(b.MovieId),
+		character.WithCert(cert, key),
+	)
 
 	cm := s.characterDb.Add(c)
 
@@ -80,4 +101,27 @@ func (s Server) DeleteCharactersCharacterId(_ context.Context, request api.Delet
 
 	s.log.Info("DeleteCharactersCharacterId", zap.String("action", "finished"))
 	return api.DeleteCharactersCharacterId204Response{}, nil
+}
+
+func (s Server) GetCharactersCharacterIdCert(_ context.Context, request api.GetCharactersCharacterIdCertRequestObject) (api.GetCharactersCharacterIdCertResponseObject, error) {
+	s.log.Info("GetCharactersCharacterIdCert", zap.String("action", "started"))
+	m, err := s.characterDb.GetById(request.CharacterId)
+	if err != nil {
+		s.log.Info("GetCharactersCharacterIdCert", zap.String("action", "failed"), zap.Error(err))
+		return api.GetCharactersCharacterIdCert404Response{}, nil
+	}
+
+	buf := new(bytes.Buffer)
+
+	err = pem.Encode(buf, &pem.Block{Type: "CERTIFICATE", Bytes: m.GetCert().Raw})
+	if err != nil {
+		return nil, err
+	}
+
+	var res api.GetCharactersCharacterIdCert200TextResponse
+
+	res = api.GetCharactersCharacterIdCert200TextResponse(buf.String())
+
+	s.log.Info("GetCharactersCharacterIdCert", zap.String("action", "finished"))
+	return res, nil
 }
