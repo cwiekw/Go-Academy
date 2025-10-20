@@ -59,7 +59,7 @@ func (s Server) PostCharacters(_ context.Context, request api.PostCharactersRequ
 		return api.PostCharacters412Response{}, nil
 	}
 
-	cert, key, err := s.certManager.GenerateCertificateBasedOnCert(m.GetCert(), m.GetKey())
+	cert, key, err := s.certManager.GenerateCertificateBasedOnCert(b.Name, m.GetCert(), m.GetKey())
 
 	if err != nil {
 		return nil, err

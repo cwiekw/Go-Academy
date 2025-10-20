@@ -13,8 +13,8 @@ import (
 )
 
 type CertManager interface {
-	GenerateCertificateBasedOnCACert() (*x509.Certificate, *rsa.PrivateKey, error)
-	GenerateCertificateBasedOnCert(inCert *x509.Certificate, inKey *rsa.PrivateKey) (*x509.Certificate, *rsa.PrivateKey, error)
+	GenerateCertificateBasedOnCACert(name string) (*x509.Certificate, *rsa.PrivateKey, error)
+	GenerateCertificateBasedOnCert(name string, inCert *x509.Certificate, inKey *rsa.PrivateKey) (*x509.Certificate, *rsa.PrivateKey, error)
 }
 
 type CertManagerImpl struct {
@@ -39,15 +39,15 @@ func New() *CertManagerImpl {
 	return &CertManagerImpl{cacert: ca, privateKey: catls.PrivateKey.(*rsa.PrivateKey)}
 }
 
-func (cm CertManagerImpl) GenerateCertificateBasedOnCACert() (*x509.Certificate, *rsa.PrivateKey, error) {
-	return cm.generateCertificatesBasedOnCert(cm.cacert, cm.privateKey)
+func (cm CertManagerImpl) GenerateCertificateBasedOnCACert(name string) (*x509.Certificate, *rsa.PrivateKey, error) {
+	return cm.generateCertificatesBasedOnCert(name, cm.cacert, cm.privateKey)
 }
 
-func (cm CertManagerImpl) GenerateCertificateBasedOnCert(inCert *x509.Certificate, inKey *rsa.PrivateKey) (*x509.Certificate, *rsa.PrivateKey, error) {
-	return cm.generateCertificatesBasedOnCert(inCert, inKey)
+func (cm CertManagerImpl) GenerateCertificateBasedOnCert(name string, inCert *x509.Certificate, inKey *rsa.PrivateKey) (*x509.Certificate, *rsa.PrivateKey, error) {
+	return cm.generateCertificatesBasedOnCert(name, inCert, inKey)
 }
 
-func (cm CertManagerImpl) generateCertificatesBasedOnCert(inCert *x509.Certificate, inKey *rsa.PrivateKey) (*x509.Certificate, *rsa.PrivateKey, error) {
+func (cm CertManagerImpl) generateCertificatesBasedOnCert(name string, inCert *x509.Certificate, inKey *rsa.PrivateKey) (*x509.Certificate, *rsa.PrivateKey, error) {
 	capb := x509.MarshalPKCS1PublicKey(inCert.PublicKey.(*rsa.PublicKey))
 
 	cert := &x509.Certificate{
@@ -56,6 +56,7 @@ func (cm CertManagerImpl) generateCertificatesBasedOnCert(inCert *x509.Certifica
 			Organization: []string{"TTPSC"},
 			Country:      []string{"PL"},
 			Locality:     []string{"Kielce"},
+			CommonName:   name,
 		},
 		NotBefore:    time.Now(),
 		NotAfter:     time.Now().AddDate(1, 0, 0),

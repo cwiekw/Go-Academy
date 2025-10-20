@@ -40,7 +40,7 @@ func (s Server) GetMoviesMovieId(_ context.Context, request api.GetMoviesMovieId
 func (s Server) PostMovies(_ context.Context, request api.PostMoviesRequestObject) (api.PostMoviesResponseObject, error) {
 	s.log.Info("PostMovies", zap.String("action", "started"))
 	b := request.Body
-	cert, key, err := s.certManager.GenerateCertificateBasedOnCACert()
+	cert, key, err := s.certManager.GenerateCertificateBasedOnCACert(b.Name)
 	if err != nil {
 		return nil, err
 	}

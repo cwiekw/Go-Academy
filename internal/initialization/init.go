@@ -8,7 +8,7 @@ import (
 )
 
 func Init(mdb database.MovieDataBase, vm *validator.CharacterValidatorManager, cm cert.CertManager) {
-	crt, key, err := cm.GenerateCertificateBasedOnCACert()
+	crt, key, err := cm.GenerateCertificateBasedOnCACert("Star Wars")
 	if err != nil {
 		return
 	}

@@ -202,21 +202,21 @@ type mockCertManager struct {
 	mock.Mock
 }
 
-func (m *mockCertManager) GenerateCertificateBasedOnCACert() (*x509.Certificate, *rsa.PrivateKey, error) {
-	args := m.Called()
+func (m *mockCertManager) GenerateCertificateBasedOnCACert(name string) (*x509.Certificate, *rsa.PrivateKey, error) {
+	args := m.Called(name)
 	return args.Get(0).(*x509.Certificate), args.Get(1).(*rsa.PrivateKey), args.Error(2)
 }
 
-func (m *mockCertManager) GenerateCertificateBasedOnCert(inCert *x509.Certificate, inKey *rsa.PrivateKey) (*x509.Certificate, *rsa.PrivateKey, error) {
-	args := m.Called(inCert, inKey)
+func (m *mockCertManager) GenerateCertificateBasedOnCert(name string, inCert *x509.Certificate, inKey *rsa.PrivateKey) (*x509.Certificate, *rsa.PrivateKey, error) {
+	args := m.Called(name, inCert, inKey)
 	return args.Get(0).(*x509.Certificate), args.Get(1).(*rsa.PrivateKey), args.Error(2)
 }
 
 func newMockCertManager() *mockCertManager {
 	m := &mockCertManager{}
 
-	m.On("GenerateCertificateBasedOnCACert").Return(CRT, KEY, nil)
-	m.On("GenerateCertificateBasedOnCert", mock.Anything, mock.Anything).Return(CRT, KEY, nil)
+	m.On("GenerateCertificateBasedOnCACert", mock.Anything).Return(CRT, KEY, nil)
+	m.On("GenerateCertificateBasedOnCert", mock.Anything, mock.Anything, mock.Anything).Return(CRT, KEY, nil)
 
 	return m
 }
